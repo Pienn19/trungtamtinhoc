@@ -1,0 +1,181 @@
+/* My Registrations Page Styles */
+
+.my-registrations-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.my-registrations-container h1 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.empty-state p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.empty-state button {
+    padding: 10px 30px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.registrations-list {
+    display: grid;
+    gap: 20px;
+}
+
+.registration-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+.registration-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.card-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+}
+
+.card-header .course-name {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.card-header .status {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.card-content {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-content .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.card-content .info-row:last-child {
+    margin-bottom: 0;
+}
+
+.card-content .label {
+    color: #666;
+    font-weight: 500;
+}
+
+.card-content .value {
+    color: #333;
+    font-weight: 500;
+}
+
+.card-content .value.price {
+    color: #e74c3c;
+    font-size: 16px;
+}
+
+.card-content .value.payment-status {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.card-content .value.payment-status.chưa {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.card-content .value.payment-status.đã {
+    background: #d4edda;
+    color: #155724;
+}
+
+.card-content .value.payment-status.hoàn {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    padding: 15px 20px;
+    background: #f9f9f9;
+    justify-content: flex-end;
+}
+
+.btn-pay,
+.btn-cancel {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-pay {
+    background: #28a745;
+    color: white;
+}
+
+.btn-pay:hover {
+    background: #218838;
+}
+
+.btn-cancel {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #c0392b;
+}
+
+.btn-cancel:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}

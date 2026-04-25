@@ -1,0 +1,249 @@
+/* Course Detail Page Styles */
+
+.course-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+    transition: background 0.3s;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.course-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 28px;
+    flex: 1;
+}
+
+.course-header .status {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.course-header .status.active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.course-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+    .course-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+.left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.course-image {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+    max-height: 400px;
+}
+
+.course-info {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.course-info h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.course-info .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.course-info .info-row:last-child {
+    margin-bottom: 0;
+}
+
+.course-info .label {
+    color: #666;
+    font-weight: 500;
+}
+
+.course-info .value {
+    color: #333;
+    font-weight: 500;
+}
+
+.course-info .value.price {
+    color: #e74c3c;
+    font-size: 18px;
+}
+
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.description,
+.detailed-description,
+.info-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.description h3,
+.detailed-description h3,
+.info-section h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.description p,
+.detailed-description p,
+.info-section p {
+    margin: 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+.classes-section {
+    margin-top: 40px;
+}
+
+.classes-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.classes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.class-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.class-card h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.class-info {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.class-info .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.class-info .info-row:last-child {
+    margin-bottom: 0;
+}
+
+.class-info .label {
+    color: #666;
+    font-weight: 500;
+}
+
+.class-info .value {
+    color: #333;
+    font-weight: 600;
+}
+
+.class-info .value.status {
+    padding: 2px 8px;
+    background: #e7f3ff;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.class-info .value.status.planning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.class-info .value.status.ongoing {
+    background: #d4edda;
+    color: #155724;
+}
+
+.class-info .value.status.closed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-register {
+    width: 100%;
+    padding: 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-register:hover {
+    background: #218838;
+}
+
+.btn-register:disabled,
+.btn-register.disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}

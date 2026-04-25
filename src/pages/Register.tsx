@@ -6,13 +6,17 @@ import { type RegisterDTO } from "../types/Auth";
 const Register = () => {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState<RegisterDTO & { soDienThoai?: string }>({
+  const [form, setForm] = useState<RegisterDTO>({
     tenDangNhap: "",
     matKhau: "",
-    soDienThoai: "",
+    hoTen: "",
+    email: "",
+    dienThoai: "",
   });
 
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
@@ -21,176 +25,120 @@ const Register = () => {
     });
   };
 
+  const validateForm = () => {
+    if (!form.tenDangNhap.trim()) {
+      setError("Vui lòng nhập tên đăng nhập");
+      return false;
+    }
+    if (!form.matKhau || form.matKhau.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      return false;
+    }
+    if (form.matKhau !== confirmPassword) {
+      setError("Xác nhận mật khẩu không khớp");
+      return false;
+    }
+    if (!form.hoTen?.trim()) {
+      setError("Vui lòng nhập họ tên");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!validateForm()) return;
+
     try {
-      // Nếu backend chưa có soDienThoai thì tạm loại bỏ khi gửi
-      const registerData = { tenDangNhap: form.tenDangNhap, matKhau: form.matKhau };
-      await register(registerData);
-      alert("Đăng ký thành công!");
-      navigate("/dang-nhap");
-    } catch (err) {
-      setError("Đăng ký thất bại! Vui lòng thử lại.");
+      await register(form);
+      setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
+      setTimeout(() => {
+        navigate("/dang-nhap");
+      }, 2000);
+    } catch (err: any) {
+      console.error("Register error:", err);
+      setError(err.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
 
-  const styles = {
-    // Giữ nguyên styles từ Login để đồng bộ
-    container: {
-      minHeight: "100vh",
-      display: "flex",
-      background: "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
-    },
-    leftPanel: {
-      flex: 1,
-      background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
-      color: "white",
-      padding: "60px 40px",
-      display: "flex",
-      flexDirection: "column" as const,
-      justifyContent: "center",
-      alignItems: "center",
-      textAlign: "center" as const,
-    },
-    illustration: {
-      width: "80%",
-      maxWidth: "420px",
-      borderRadius: "16px",
-      boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-      background: "#334155",
-      height: "320px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "1.2rem",
-      color: "#94a3b8",
-    },
-    rightPanel: {
-      flex: 1,
-      padding: "40px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "white",
-    },
-    formBox: {
-      width: "100%",
-      maxWidth: "420px",
-    },
-    title: {
-      fontSize: "2.25rem",
-      fontWeight: "bold",
-      marginBottom: "12px",
-      color: "#1e293b",
-    },
-    subtitle: {
-      color: "#64748b",
-      marginBottom: "32px",
-    },
-    input: {
-      width: "100%",
-      padding: "14px 16px",
-      marginBottom: "16px",
-      border: "1px solid #cbd5e1",
-      borderRadius: "8px",
-      fontSize: "1rem",
-      outline: "none",
-      transition: "border-color 0.2s",
-      background: "#f8fafc",
-    },
-    button: {
-      width: "100%",
-      padding: "14px",
-      background: "#2563eb",
-      color: "white",
-      border: "none",
-      borderRadius: "8px",
-      fontSize: "1.05rem",
-      fontWeight: "600",
-      cursor: "pointer",
-      marginTop: "12px",
-    },
-    error: {
-      color: "#ef4444",
-      marginBottom: "16px",
-      textAlign: "center" as const,
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      {/* Bên trái - Illustration */}
-      <div style={styles.leftPanel}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "24px" }}>
-          Bắt đầu hành trình
-        </h1>
-        <p style={{ fontSize: "1.2rem", maxWidth: "380px", marginBottom: "40px" }}>
-          Tham gia ngay để khám phá hàng trăm khóa học tin học chất lượng cao!
+    <div style={{ minHeight: "100vh", padding: "40px 20px", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ maxWidth: "450px", width: "100%", background: "white", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}>
+        <h1 style={{ fontSize: "2rem", marginBottom: "12px", color: "#1e293b", textAlign: "center" }}>Đăng ký</h1>
+        <p style={{ color: "#64748b", marginBottom: "32px", textAlign: "center" }}>Tạo tài khoản miễn phí</p>
+
+        {error && <div style={{ color: "#ef4444", background: "#fee2e2", padding: "12px", borderRadius: "6px", marginBottom: "16px" }}>{error}</div>}
+        {success && <div style={{ color: "#16a34a", background: "#dcfce7", padding: "12px", borderRadius: "6px", marginBottom: "16px" }}>{success}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="text"
+            name="tenDangNhap"
+            placeholder="Tên đăng nhập"
+            value={form.tenDangNhap}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="text"
+            name="hoTen"
+            placeholder="Họ tên"
+            value={form.hoTen || ""}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email || ""}
+            onChange={handleChange}
+          />
+
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="tel"
+            name="dienThoai"
+            placeholder="Số điện thoại"
+            value={form.dienThoai || ""}
+            onChange={handleChange}
+          />
+
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="password"
+            name="matKhau"
+            placeholder="Mật khẩu"
+            value={form.matKhau}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "20px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="password"
+            placeholder="Xác nhận mật khẩu"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+
+          <button type="submit" style={{ width: "100%", padding: "12px", background: "#2563eb", color: "white", border: "none", borderRadius: "6px", fontSize: "1rem", fontWeight: "600", cursor: "pointer" }}>
+            Tạo tài khoản
+          </button>
+        </form>
+
+        <p style={{ textAlign: "center", marginTop: "20px", color: "#64748b" }}>
+          Đã có tài khoản? <a href="/dang-nhap" style={{ color: "#2563eb", textDecoration: "none", fontWeight: "600" }}>Đăng nhập</a>
         </p>
-        <div style={styles.illustration}>
-        <img
-            src="/images/register.png" 
-            style={{
-              width: "100%",
-              maxWidth: "auto",
-              height: "100%",
-              borderRadius: "16px",
-              boxShadow: "0 20px 40px rgba(35, 76, 207, 0.3)",
-            }}
-          />        </div>
-      </div>
-
-      {/* Bên phải - Form */}
-      <div style={styles.rightPanel}>
-        <div style={styles.formBox}>
-          <h2 style={styles.title}>Đăng ký</h2>
-          <p style={styles.subtitle}>Tạo tài khoản miễn phí ngay hôm nay</p>
-
-          {error && <p style={styles.error}>{error}</p>}
-
-          <form onSubmit={handleSubmit}>
-            <input
-              style={styles.input}
-              type="text"
-              name="tenDangNhap"
-              placeholder="Tên đăng nhập"
-              value={form.tenDangNhap}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              style={styles.input}
-              type="tel"
-              name="soDienThoai"
-              placeholder="Số điện thoại (ví dụ: 090xxxxxxx)"
-              value={form.soDienThoai || ""}
-              onChange={handleChange}
-              // required  // nếu backend hỗ trợ thì bật
-            />
-
-            <input
-              style={styles.input}
-              type="password"
-              name="matKhau"
-              placeholder="Mật khẩu"
-              value={form.matKhau}
-              onChange={handleChange}
-              required
-            />
-
-            <button type="submit" style={styles.button}>
-              Tạo tài khoản
-            </button>
-          </form>
-
-          <p style={{ textAlign: "center", marginTop: "24px", color: "#64748b" }}>
-            Đã có tài khoản?{" "}
-            <a href="/dang-nhap" style={{ color: "#2563eb", fontWeight: "600" }}>
-              Đăng nhập
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );

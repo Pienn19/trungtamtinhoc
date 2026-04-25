@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/authService";
 import { type LoginDTO } from "../types/Auth";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,191 +25,74 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await login(form);
+      console.log("Login response:", res);
+
       localStorage.setItem("token", res.token);
       localStorage.setItem("username", form.tenDangNhap);
+
+      // Decode JWT để lấy userId và role
+      try {
+        const decoded: any = jwtDecode(res.token);
+        console.log("Decoded JWT:", decoded);
+        console.log("All JWT properties:", Object.keys(decoded));
+
+        localStorage.setItem("userId", decoded.UserId || decoded.userId || "");
+
+        // JWT role claim có thể là "role" hoặc từ tên vai trò
+        const role = decoded.role || decoded.Role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "";
+        console.log("User role:", role);
+        localStorage.setItem("userRole", role);
+      } catch (decodeError) {
+        console.error("Error decoding JWT:", decodeError);
+      }
+
       alert("Đăng nhập thành công!");
       window.dispatchEvent(new Event("storage"));
       navigate("/");
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Login error:", err);
+      console.error("Error response:", err.response?.data);
       setError("Sai tài khoản hoặc mật khẩu!");
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Sau này gắn logic Google OAuth ở đây
-    alert("Chức năng đăng nhập Google đang được phát triển!");
-  };
-
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      display: "flex",
-      background: "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
-    },
-    leftPanel: {
-      flex: 1,
-      background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
-      color: "white",
-      padding: "60px 40px",
-      display: "flex",
-      flexDirection: "column" as const,
-      justifyContent: "center",
-      alignItems: "center",
-      textAlign: "center" as const,
-      position: "relative" as const,
-    },
-    illustration: {
-      width: "80%",
-      maxWidth: "420px",
-      borderRadius: "16px",
-      boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-      background: "#334155",
-      height: "320px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "1.2rem",
-      color: "#94a3b8",
-    },
-    rightPanel: {
-      flex: 1,
-      padding: "40px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "white",
-    },
-    formBox: {
-      width: "100%",
-      maxWidth: "420px",
-    },
-    title: {
-      fontSize: "2.25rem",
-      fontWeight: "bold",
-      marginBottom: "12px",
-      color: "#1e293b",
-    },
-    subtitle: {
-      color: "#64748b",
-      marginBottom: "32px",
-    },
-    input: {
-      width: "100%",
-      padding: "14px 16px",
-      marginBottom: "16px",
-      border: "1px solid #cbd5e1",
-      borderRadius: "8px",
-      fontSize: "1rem",
-      outline: "none",
-      transition: "border-color 0.2s",
-      background: "#f8fafc",
-    },
-    button: {
-      width: "100%",
-      padding: "14px",
-      background: "#2563eb",
-      color: "white",
-      border: "none",
-      borderRadius: "8px",
-      fontSize: "1.05rem",
-      fontWeight: "600",
-      cursor: "pointer",
-      marginTop: "12px",
-      transition: "background 0.2s",
-    },
-    googleButton: {
-      width: "100%",
-      padding: "14px",
-      background: "#ffffff",
-      color: "#1e293b",
-      border: "1px solid #cbd5e1",
-      borderRadius: "8px",
-      fontSize: "1.05rem",
-      fontWeight: "500",
-      cursor: "pointer",
-      marginTop: "16px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "12px",
-    },
-    error: {
-      color: "#ef4444",
-      marginBottom: "16px",
-      textAlign: "center" as const,
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      {/* Bên trái - Illustration */}
-      <div style={styles.leftPanel}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "24px" }}>
-          Trung Tâm Tin Học
-        </h1>
-        <p style={{ fontSize: "1.2rem", maxWidth: "380px", marginBottom: "40px" }}>
-          Nơi bắt đầu hành trình học lập trình và tin học chuyên sâu của bạn
-        </p>
-        <div style={styles.illustration}>
-          {/* Bạn có thể thay bằng <img src="..." /> sau */}
-          <img
-            src="/images/login.jpg" 
-            style={{
-              width: "100%",
-              maxWidth: "auto",
-              height: "100%",
-              borderRadius: "16px",
-              boxShadow: "0 20px 40px rgba(35, 76, 207, 0.3)",
-            }}
+    <div style={{ minHeight: "100vh", padding: "40px 20px", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ maxWidth: "450px", width: "100%", background: "white", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}>
+        <h1 style={{ fontSize: "2rem", marginBottom: "12px", color: "#1e293b", textAlign: "center" }}>Đăng nhập</h1>
+        <p style={{ color: "#64748b", marginBottom: "32px", textAlign: "center" }}>Chào mừng bạn quay lại!</p>
+
+        {error && <div style={{ color: "#ef4444", background: "#fee2e2", padding: "12px", borderRadius: "6px", marginBottom: "16px" }}>{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="text"
+            name="tenDangNhap"
+            placeholder="Tên đăng nhập"
+            value={form.tenDangNhap}
+            onChange={handleChange}
+            required
           />
-        </div>
-      </div>
 
-      {/* Bên phải - Form */}
-      <div style={styles.rightPanel}>
-        <div style={styles.formBox}>
-          <h2 style={styles.title}>Đăng nhập</h2>
-          <p style={styles.subtitle}>Chào mừng bạn quay lại!</p>
+          <input
+            style={{ width: "100%", padding: "12px", marginBottom: "20px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
+            type="password"
+            name="matKhau"
+            placeholder="Mật khẩu"
+            value={form.matKhau}
+            onChange={handleChange}
+            required
+          />
 
-          {error && <p style={styles.error}>{error}</p>}
-
-          <form onSubmit={handleSubmit}>
-            <input
-              style={styles.input}
-              type="text"
-              name="tenDangNhap"
-              placeholder="Tên đăng nhập hoặc email"
-              value={form.tenDangNhap}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              style={styles.input}
-              type="password"
-              name="matKhau"
-              placeholder="Mật khẩu"
-              value={form.matKhau}
-              onChange={handleChange}
-              required
-            />
-
-            <button type="submit" style={styles.button}>
-              Đăng nhập
-            </button>
-          </form>
-
-          <button style={styles.googleButton} onClick={handleGoogleLogin}>
-            <span style={{ fontSize: "1.3rem" }}>G</span> Đăng nhập với Google
+          <button type="submit" style={{ width: "100%", padding: "12px", background: "#2563eb", color: "white", border: "none", borderRadius: "6px", fontSize: "1rem", fontWeight: "600", cursor: "pointer" }}>
+            Đăng nhập
           </button>
+        </form>
 
-          <p style={{ textAlign: "center", marginTop: "24px", color: "#64748b" }}>
-            Chưa có tài khoản?{" "}
-            <a href="/dang-ky" style={{ color: "#2563eb", fontWeight: "600" }}>
-              Đăng ký ngay
-            </a>
-          </p>
-        </div>
+        <p style={{ textAlign: "center", marginTop: "20px", color: "#64748b" }}>
+          Chưa có tài khoản? <a href="/dang-ky" style={{ color: "#2563eb", textDecoration: "none", fontWeight: "600" }}>Đăng ký ngay</a>
+        </p>
       </div>
     </div>
   );

@@ -7,7 +7,14 @@ const Home = () => {
   const [courses, setCourses] = useState<KhoaHoc[]>([]);
 
   useEffect(() => {
-    getKhoaHoc().then(data => setCourses(data));
+    getKhoaHoc()
+      .then(data => {
+        setCourses(Array.isArray(data) ? data : []);
+      })
+      .catch(err => {
+        console.error("Error fetching courses:", err);
+        setCourses([]);
+      });
   }, []);
 
   const styles = {
@@ -58,11 +65,11 @@ const Home = () => {
           <button style={styles.button}>Xem khóa học</button>
         </div>
       </section>
-  
+
       {/* CONTENT có container */}
       <div style={styles.container}>
         <h2 style={{ marginBottom: "40px", fontSize: "2rem", textAlign: "center" }}>Danh sách khóa học</h2>
-  
+
         <div style={styles.grid}>
           {courses.map(course => (
             <KhoaHocCard key={course.idKhoaHoc} khoaHoc={course} />
