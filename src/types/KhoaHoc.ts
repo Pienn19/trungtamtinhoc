@@ -48,6 +48,9 @@ export interface LopHocDTO {
     soChoConLai: number
     allowDangKy: boolean
     trangThai: string
+    ngayHocTrongTuan?: string
+    gioBatDau?: string
+    gioKetThuc?: string
 }
 
 export interface DangKyDTO {
@@ -67,13 +70,21 @@ export interface DangKyDetailDTO extends DangKyDTO {
     lopHocInfo: {
         idLop: number
         tenLop: string
+        ngayBatDau?: string
+        ngayKetThuc?: string
+        ngayHocTrongTuan?: string
+        gioBatDau?: string
+        gioKetThuc?: string
+        tenGiangVien?: string | null
     }
     khoaHocInfo: {
         idKhoaHoc: number
         tenKhoaHoc: string
         hocPhi: number
     }
-    paymentStatus: string
+    soTienThanhToan?: number
+    trangThaiThanhToan?: string
+    paymentStatus?: string
 }
 
 export interface ThanhToanDTO {

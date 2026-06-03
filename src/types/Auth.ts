@@ -24,6 +24,7 @@ export interface CurrentUser {
 // User Management DTOs
 export interface UserDTO {
     idTaiKhoan: number
+    idVaiTro: number
     tenDangNhap: string
     hoTen: string
     email: string

@@ -1,0 +1,528 @@
+/* AdminClassManagement Styles */
+
+.admin-class-management {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-class-management__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-3xl);
+    flex-wrap: wrap;
+}
+
+.admin-class-management__title {
+    flex: 1;
+}
+
+.admin-class-management__title h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.admin-class-management__title p {
+    margin: var(--space-sm) 0 0;
+    color: var(--color-text-secondary);
+}
+
+.admin-class-management__actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.admin-class-management__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform 150ms ease;
+    font-size: var(--text-base);
+}
+
+.admin-class-management__btn:hover {
+    transform: translateY(-1px);
+}
+
+.admin-class-management__btn--secondary {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.admin-class-management__btn--secondary:hover {
+    background-color: #F1F5F9;
+}
+
+.admin-class-management__btn--primary {
+    background-color: var(--color-info);
+    color: white;
+}
+
+.admin-class-management__btn--primary:hover {
+    background-color: #1D5DD4;
+}
+
+.admin-class-management__btn--multi-merge {
+    background-color: #7c3aed;
+    color: white;
+}
+
+.admin-class-management__btn--multi-merge:hover {
+    background-color: #6d28d9;
+}
+
+.admin-class-management__btn--history {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.admin-class-management__btn--history:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.admin-class-management__btn--suggestions {
+    background-color: var(--color-warning);
+    color: #1F2937;
+}
+
+.admin-class-management__btn--suggestions:hover {
+    background-color: #D97706;
+}
+
+/* Form Section */
+.admin-class-management__form-section {
+    background-color: var(--color-bg);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-3xl);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+}
+
+.admin-class-management__form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.admin-class-management__form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-class-management__form-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: var(--space-sm);
+}
+
+.admin-class-management__form-input,
+.admin-class-management__form-select,
+.admin-class-management__form-textarea {
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.admin-class-management__form-input:focus,
+.admin-class-management__form-select:focus,
+.admin-class-management__form-textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    outline: none;
+}
+
+.admin-class-management__form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.admin-class-management__form-actions {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.admin-class-management__form-btn {
+    padding: var(--space-md) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    font-size: var(--text-base);
+}
+
+.admin-class-management__form-btn--save {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.admin-class-management__form-btn--save:hover {
+    background-color: #15803D;
+}
+
+.admin-class-management__form-btn--cancel {
+    background-color: #64748b;
+    color: white;
+}
+
+.admin-class-management__form-btn--cancel:hover {
+    background-color: #475569;
+}
+
+/* Main Content Grid */
+.admin-class-management__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2xl);
+}
+
+.admin-class-management__content>.admin-class-management__sidebar {
+    width: 380px;
+}
+
+/* Table Section */
+.admin-class-management__table-card {
+    background-color: var(--color-bg);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+}
+
+.admin-class-management__table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+.admin-class-management__table thead {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-class-management__table th {
+    padding: var(--space-lg);
+    text-align: left;
+    font-weight: 700;
+    font-size: var(--text-sm);
+    color: #475569;
+}
+
+.admin-class-management__table td {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--text-base);
+    vertical-align: top;
+}
+
+.admin-class-management__table tbody tr {
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.admin-class-management__table tbody tr:hover {
+    background-color: #F1F5F9;
+}
+
+.admin-class-management__table tbody tr.selected {
+    background-color: #eff6ff;
+}
+
+/* Status Badge */
+.admin-class-management__status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.admin-class-management__status-badge--planning {
+    background-color: #fef3c7;
+}
+
+.admin-class-management__status-badge--ongoing {
+    background-color: #dbeafe;
+}
+
+.admin-class-management__status-badge--closed {
+    background-color: #dcfce7;
+}
+
+.admin-class-management__status-badge--unknown {
+    background-color: #e2e8f0;
+}
+
+/* Action Buttons in Table */
+.admin-class-management__action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    flex-wrap: nowrap;
+}
+
+.admin-class-management__action-btn {
+    padding: 4px 6px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    transition: background-color var(--transition-fast);
+    min-width: fit-content;
+}
+
+.admin-class-management__action-btn--edit {
+    background-color: var(--color-info);
+}
+
+.admin-class-management__action-btn--edit:hover {
+    background-color: #1D5DD4;
+}
+
+.admin-class-management__action-btn--delete {
+    background-color: var(--color-error);
+}
+
+.admin-class-management__action-btn--delete:hover {
+    background-color: #B91C1C;
+}
+
+.admin-class-management__action-btn--merge {
+    background-color: #7c3aed;
+}
+
+.admin-class-management__action-btn--merge:hover {
+    background-color: #6d28d9;
+}
+
+/* Sidebar Section */
+.admin-class-management__sidebar {
+    background-color: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    height: fit-content;
+}
+
+.admin-class-management__sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.admin-class-management__sidebar-title {
+    margin: 0;
+    font-size: var(--text-lg);
+}
+
+.admin-class-management__sidebar-subtitle {
+    margin: var(--space-sm) 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+}
+
+.admin-class-management__info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.admin-class-management__info-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    background-color: var(--color-surface);
+}
+
+.admin-class-management__info-label {
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.admin-class-management__info-value {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* Modal Styles */
+.admin-class-management__modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+    z-index: 50;
+}
+
+.admin-class-management__modal {
+    width: 100%;
+    max-width: 760px;
+    background-color: var(--color-bg);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-modal);
+    padding: var(--space-3xl);
+    border: 1px solid var(--color-border);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.admin-class-management__modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.admin-class-management__modal-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.admin-class-management__modal-subtitle {
+    margin: var(--space-sm) 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-base);
+}
+
+.admin-class-management__modal-close-btn {
+    border: none;
+    background-color: var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-full);
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.admin-class-management__modal-close-btn:hover {
+    background-color: #CBD5E1;
+}
+
+.admin-class-management__modal-content {
+    margin-bottom: var(--space-2xl);
+}
+
+.admin-class-management__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-lg);
+}
+
+.admin-class-management__modal-btn--secondary {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.admin-class-management__modal-btn--secondary:hover {
+    background-color: var(--color-surface);
+}
+
+.admin-class-management__modal-btn--primary {
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 200ms ease;
+}
+
+.admin-class-management__modal-btn--primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.admin-class-management__modal-btn--primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .admin-class-management__content {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-class-management__info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-class-management__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-class-management__title h1 {
+        font-size: 22px;
+    }
+
+    .admin-class-management__actions {
+        width: 100%;
+    }
+
+    .admin-class-management__btn {
+        flex: 1;
+        justify-content: center;
+        font-size: var(--text-sm);
+    }
+
+    .admin-class-management__form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-class-management__modal {
+        padding: var(--space-2xl);
+    }
+
+    .admin-class-management__table th,
+    .admin-class-management__table td {
+        padding: var(--space-md);
+        font-size: var(--text-sm);
+    }
+}

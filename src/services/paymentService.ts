@@ -1,7 +1,8 @@
 import type { ThanhToanDTO, BienLaiDTO, ConfirmPaymentRequestDTO } from '../types/KhoaHoc'
 import { getAuthToken } from './authService'
+import { API_BASE_URL } from './apiBase'
 
-const API_URL = 'http://localhost:5025/api'
+const API_URL = API_BASE_URL
 
 /**
  * Feature #2: Payment Service
@@ -22,7 +23,9 @@ export const getPaymentInfo = async (registrationId: number): Promise<ThanhToanD
     })
 
     if (!response.ok) {
-        throw new Error('Không tìm thấy thông tin thanh toán')
+        const errorText = await response.text()
+        console.error(`Payment info request failed: ${response.status}`, errorText)
+        throw new Error(errorText || 'Không tìm thấy thông tin thanh toán')
     }
 
     return response.json()

@@ -10,6 +10,11 @@ export default function StudentGradesManagement() {
     const [classes, setClasses] = useState<LopHocDTO[]>([]);
     const [statistics, setStatistics] = useState<GradeStatisticsDTO | null>(null);
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
+    const [createForm, setCreateForm] = useState({
+        idDangKy: '',
+        diemChuyenCan: '',
+        diemThi: '',
+    });
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({
         diemChuyenCan: 0,
@@ -17,34 +22,28 @@ export default function StudentGradesManagement() {
     });
     const [showEditModal, setShowEditModal] = useState(false);
 
-    // Load data on mount
-    useEffect(() => {
-        loadClasses();
-        loadResults();
-    }, []);
-
     // Load classes
-    const loadClasses = async () => {
+    async function loadClasses() {
         try {
             const res = await classService.getAllLopHoc();
             setClasses(res.data);
         } catch (err) {
             console.error('Lỗi load lớp:', err);
         }
-    };
+    }
 
     // Load results
-    const loadResults = async () => {
+    async function loadResults() {
         try {
             const res = await ketQuaHocTapService.getAllResults();
             setResults(res.data);
         } catch (err) {
             console.error('Lỗi load kết quả:', err);
         }
-    };
+    }
 
     // Load statistics by class
-    const loadStatistics = async (classId: number) => {
+    async function loadStatistics(classId: number) {
         try {
             const res = await ketQuaHocTapService.getClassStatistics(classId);
             setStatistics(res.data);
@@ -55,12 +54,23 @@ export default function StudentGradesManagement() {
         } catch (err) {
             console.error('Lỗi load thống kê:', err);
         }
-    };
+    }
+
+    // Load data on mount
+    useEffect(() => {
+        loadClasses();
+        loadResults();
+    }, []);
 
     // Handle class selection
-    const handleSelectClass = (classId: number) => {
+    const handleSelectClass = (classId: number | null) => {
         setSelectedClass(classId);
-        loadStatistics(classId);
+        if (classId) {
+            loadStatistics(classId);
+        } else {
+            setStatistics(null);
+            loadResults();
+        }
     };
 
     // Handle edit
@@ -97,6 +107,57 @@ export default function StudentGradesManagement() {
         }
     };
 
+    const handleCreate = async () => {
+        const idDangKy = Number(createForm.idDangKy);
+        const diemChuyenCan = createForm.diemChuyenCan === '' ? undefined : Number(createForm.diemChuyenCan);
+        const diemThi = createForm.diemThi === '' ? undefined : Number(createForm.diemThi);
+
+        if (!Number.isInteger(idDangKy) || idDangKy <= 0) {
+            alert('Vui lòng nhập ID đăng ký hợp lệ');
+            return;
+        }
+
+        if (diemChuyenCan !== undefined && (Number.isNaN(diemChuyenCan) || diemChuyenCan < 0 || diemChuyenCan > 10)) {
+            alert('Điểm chuyên cần phải từ 0 đến 10');
+            return;
+        }
+
+        if (diemThi !== undefined && (Number.isNaN(diemThi) || diemThi < 0 || diemThi > 10)) {
+            alert('Điểm thi phải từ 0 đến 10');
+            return;
+        }
+
+        try {
+            const response = await ketQuaHocTapService.createResult({
+                idDangKy,
+                diemChuyenCan,
+                diemThi,
+            });
+
+            const data = response.data as { certificateIssued?: boolean; idChungChi?: number };
+            alert(
+                data.certificateIssued
+                    ? `Tạo kết quả thành công. Chứng chỉ đã được cấp${data.idChungChi ? ` (ID ${data.idChungChi})` : ''}.`
+                    : 'Tạo kết quả thành công.'
+            );
+
+            setCreateForm({
+                idDangKy: '',
+                diemChuyenCan: '',
+                diemThi: '',
+            });
+
+            if (selectedClass) {
+                loadStatistics(selectedClass);
+            } else {
+                loadResults();
+            }
+        } catch (err) {
+            console.error('Lỗi tạo kết quả:', err);
+            alert('Không thể tạo kết quả');
+        }
+    };
+
     // Handle delete
     const handleDelete = async (id: number) => {
         if (!confirm('Bạn chắc chắn muốn xóa kết quả này?')) return;
@@ -120,12 +181,57 @@ export default function StudentGradesManagement() {
         <div className="student-grades-management">
             <h2>Quản Lý Kết Quả Học Tập</h2>
 
+            <div className="statistics-section student-grades-management__create-section">
+                <h3>➕ Nhập kết quả mới</h3>
+                <div className="form-grid student-grades-management__create-grid">
+                    <div className="form-group">
+                        <label>ID đăng ký</label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={createForm.idDangKy}
+                            onChange={(e) => setCreateForm({ ...createForm, idDangKy: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Điểm chuyên cần</label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="0.5"
+                            value={createForm.diemChuyenCan}
+                            onChange={(e) => setCreateForm({ ...createForm, diemChuyenCan: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Điểm thi</label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="0.5"
+                            value={createForm.diemThi}
+                            onChange={(e) => setCreateForm({ ...createForm, diemThi: e.target.value })}
+                        />
+                    </div>
+                </div>
+                <div className="modal-buttons student-grades-management__create-actions">
+                    <button className="btn-primary" onClick={handleCreate}>
+                        Lưu kết quả mới
+                    </button>
+                </div>
+            </div>
+
             {/* Class Selector */}
             <div className="class-selector">
                 <label>Chọn lớp học:</label>
                 <select
                     value={selectedClass || ''}
-                    onChange={(e) => handleSelectClass(parseInt(e.target.value))}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        handleSelectClass(value ? parseInt(value, 10) : null);
+                    }}
                 >
                     <option value="">-- Tất cả lớp --</option>
                     {classes.map((cls) => (

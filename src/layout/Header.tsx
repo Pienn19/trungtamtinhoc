@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { logout } from "../services/authService";
+import { toast } from "react-toastify";
+import { normalizeUserRole } from "../utils/authHelper";
 
 const Header = () => {
   const [username, setUsername] = useState<string | null>(localStorage.getItem("username"));
@@ -12,8 +14,6 @@ const Header = () => {
     newPassword: "",
     confirmPassword: "",
   });
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -30,6 +30,8 @@ const Header = () => {
     };
   }, []);
 
+  const normalizedUserRole = normalizeUserRole(userRole);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -45,16 +47,14 @@ const Header = () => {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError("Mật khẩu mới không khớp");
+      toast.error("Mật khẩu mới không khớp");
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setPasswordError("Mật khẩu mới phải có ít nhất 6 ký tự");
+      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự");
       return;
     }
 
@@ -65,7 +65,7 @@ const Header = () => {
         passwordForm.newPassword,
         passwordForm.confirmPassword
       );
-      setPasswordSuccess("Thay đổi mật khẩu thành công!");
+      toast.success("Thay đổi mật khẩu thành công!");
       setPasswordForm({
         oldPassword: "",
         newPassword: "",
@@ -73,9 +73,9 @@ const Header = () => {
       });
       setTimeout(() => {
         setShowChangePassword(false);
-      }, 2000);
+      }, 1000);
     } catch (error: any) {
-      setPasswordError(
+      toast.error(
         error.response?.data?.message || "Thay đổi mật khẩu thất bại"
       );
     }
@@ -85,7 +85,17 @@ const Header = () => {
     <header style={styles.header}>
       <div style={styles.container}>
         <div style={styles.headerContent}>
-          <h2 style={styles.logo}>Trung Tâm Tin Học PyTech</h2>
+          <div style={styles.brandBlock}>
+            <img
+              src="/images/logoweb.png"
+              alt="PyTech Logo"
+              style={styles.logoImg}
+            />
+            <div>
+              <h2 style={styles.logo}>Trung Tâm Tin Học PyTech</h2>
+              <p style={styles.brandSubtitle}>Đào tạo tin học ứng dụng và kỹ năng số</p>
+            </div>
+          </div>
 
           <nav style={styles.nav}>
             <Link
@@ -102,12 +112,30 @@ const Header = () => {
               Khóa Học
             </Link>
 
-            {username && (
+            {username && normalizedUserRole !== "GiangVien" && normalizedUserRole !== "Admin" && (
               <Link
-                to="/my-registrations"
+                to="/lop-cua-toi"
                 style={styles.link}
               >
                 Lớp Của Tôi
+              </Link>
+            )}
+
+            {username && normalizedUserRole !== "GiangVien" && normalizedUserRole !== "Admin" && (
+              <Link
+                to="/thoi-khoa-bieu"
+                style={styles.link}
+              >
+                Thời khóa biểu
+              </Link>
+            )}
+
+            {username && normalizedUserRole === "GiangVien" && (
+              <Link
+                to="/lich-giang-day"
+                style={styles.link}
+              >
+                Lịch giảng dạy
               </Link>
             )}
 
@@ -125,7 +153,7 @@ const Header = () => {
 
                 {showDropdown && (
                   <div style={styles.dropdown}>
-                    {userRole === "Admin" && (
+                    {normalizedUserRole === "Admin" && (
                       <a
                         href="/admin"
                         style={{
@@ -137,6 +165,62 @@ const Header = () => {
                       >
                         ⚙️ Admin Panel
                       </a>
+                    )}
+                    {normalizedUserRole === "GiangVien" && (
+                      <>
+                        <Link
+                          to="/giang-vien"
+                          style={{
+                            ...styles.dropdownItem,
+                            color: "#16a34a",
+                            textDecoration: "none",
+                            display: "block",
+                          }}
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          👨‍🏫 Khu Vực Giảng Viên
+                        </Link>
+                        <Link
+                          to="/giang-vien/chuyen-lop"
+                          style={{
+                            ...styles.dropdownItem,
+                            color: "#2563eb",
+                            textDecoration: "none",
+                            display: "block",
+                          }}
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          🔄 Xem đơn chuyển lớp
+                        </Link>
+                      </>
+                    )}
+                    {normalizedUserRole === "HocVien" && (
+                      <>
+                        <Link
+                          to="/chuyen-lop"
+                          style={{
+                            ...styles.dropdownItem,
+                            color: "#2563eb",
+                            textDecoration: "none",
+                            display: "block",
+                          }}
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          🔄 Chuyển lớp của tôi
+                        </Link>
+                        <Link
+                          to="/diem"
+                          style={{
+                            ...styles.dropdownItem,
+                            color: "#2563eb",
+                            textDecoration: "none",
+                            display: "block",
+                          }}
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          📊 Xem điểm
+                        </Link>
+                      </>
                     )}
                     <button
                       style={styles.dropdownItem}
@@ -190,13 +274,6 @@ const Header = () => {
                 ✕
               </button>
             </div>
-
-            {passwordError && (
-              <p style={styles.error}>{passwordError}</p>
-            )}
-            {passwordSuccess && (
-              <p style={styles.success}>{passwordSuccess}</p>
-            )}
 
             <form onSubmit={handleChangePassword} style={styles.form}>
               <input
@@ -261,16 +338,18 @@ const Header = () => {
 
 const styles = {
   header: {
-    background: "#1e293b",
+    background: "linear-gradient(135deg, #0098d4 0%, #0085ba 100%)",
+    backdropFilter: "blur(14px)",
     color: "white",
     padding: "16px 0",
-    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+    borderBottom: "3px solid #007aa8",
+    boxShadow: "0 6px 24px rgba(0, 152, 212, 0.18)",
     position: "sticky" as const,
     top: 0,
     zIndex: 1000,
   },
   container: {
-    maxWidth: "1200px",
+    maxWidth: "1240px",
     margin: "0 auto",
     padding: "0 20px",
   },
@@ -278,55 +357,87 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "30px",
+    flexWrap: "wrap" as const,
+  },
+  brandBlock: {
+    display: "flex",
+    alignItems: "center",
+    gap: "14px",
+  },
+  logoImg: {
+    width: "56px",
+    height: "56px",
+    borderRadius: "12px",
+    objectFit: "contain" as const,
+    boxShadow: "0 6px 16px rgba(11, 120, 179, 0.18)",
   },
   logo: {
-    fontSize: "1.75rem",
-    fontWeight: "700",
+    fontSize: "1.25rem",
+    fontWeight: 900,
     margin: 0,
+    color: "white",
+    lineHeight: 1.1,
+    letterSpacing: "-0.01em",
+  },
+  brandSubtitle: {
+    margin: "4px 0 0",
+    fontSize: "11px",
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: 600,
   },
   nav: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
     alignItems: "center",
+    flexWrap: "wrap" as const,
   },
   link: {
-    color: "#e2e8f0",
+    color: "white",
     textDecoration: "none",
-    fontSize: "1.05rem",
-    padding: "10px 20px",
+    fontSize: "0.95rem",
+    fontWeight: 700,
+    padding: "10px 16px",
+    borderRadius: "6px",
+    transition: "all 0.3s ease",
+    cursor: "pointer",
+    whiteSpace: "nowrap" as const,
   },
   userBtn: {
-    color: "#e2e8f0",
-    border: "none",
-    background: "transparent",
-    fontSize: "1.05rem",
-    padding: "10px 20px",
+    color: "white",
+    border: "1.5px solid rgba(255,255,255,0.4)",
+    background: "rgba(255,255,255,0.1)",
+    fontSize: "0.92rem",
+    padding: "10px 18px",
     cursor: "pointer",
     borderRadius: "6px",
-    transition: "all 0.2s",
+    transition: "all 0.3s ease",
+    fontWeight: 700,
   },
   dropdown: {
     position: "absolute" as const,
     top: "100%",
     right: 0,
-    background: "#0f172a",
-    border: "1px solid #475569",
-    borderRadius: "8px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
-    minWidth: "200px",
-    marginTop: "4px",
+    background: "white",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    boxShadow: "0 20px 50px rgba(15, 76, 129, 0.15)",
+    minWidth: "220px",
+    marginTop: "12px",
     zIndex: 1001,
+    overflow: "hidden",
   },
   dropdownItem: {
     width: "100%",
-    padding: "12px 16px",
+    padding: "14px 18px",
     border: "none",
     background: "transparent",
-    color: "#e2e8f0",
+    color: "#334155",
     textAlign: "left" as const,
     cursor: "pointer",
-    fontSize: "1rem",
-    transition: "all 0.2s",
+    fontSize: "0.95rem",
+    transition: "all 0.2s ease",
+    fontWeight: 600,
   },
   modal: {
     position: "fixed" as const,
@@ -334,82 +445,94 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: "rgba(0,0,0,0.5)",
+    background: "rgba(0,0,0,0.4)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2000,
+    backdropFilter: "blur(4px)",
   },
   modalContent: {
     background: "white",
-    borderRadius: "12px",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-    maxWidth: "400px",
+    borderRadius: "16px",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.25)",
+    maxWidth: "420px",
     width: "90%",
-    padding: "24px",
+    padding: "32px",
+    animation: "slideUp 0.3s ease",
   },
   modalHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "20px",
+    marginBottom: "24px",
   },
   closeBtn: {
     background: "none",
     border: "none",
-    fontSize: "1.5rem",
+    fontSize: "1.8rem",
     cursor: "pointer",
-    color: "#64748b",
+    color: "#94a3b8",
+    transition: "color 0.2s ease",
   },
   form: {
     display: "flex",
     flexDirection: "column" as const,
-    gap: "12px",
+    gap: "14px",
   },
   input: {
-    padding: "12px",
-    border: "1px solid #cbd5e1",
+    padding: "12px 16px",
+    border: "1.5px solid #e2e8f0",
     borderRadius: "8px",
-    fontSize: "1rem",
+    fontSize: "0.95rem",
     outline: "none",
+    transition: "all 0.3s ease",
+    fontFamily: "inherit",
   },
   error: {
-    color: "#ef4444",
-    background: "#fee2e2",
-    padding: "10px",
-    borderRadius: "6px",
+    color: "#be123c",
+    background: "#ffe4e6",
+    padding: "12px 14px",
+    borderRadius: "8px",
     marginBottom: "12px",
+    fontWeight: 600,
   },
   success: {
-    color: "#16a34a",
+    color: "#166534",
     background: "#dcfce7",
-    padding: "10px",
-    borderRadius: "6px",
+    padding: "12px 14px",
+    borderRadius: "8px",
     marginBottom: "12px",
+    fontWeight: 600,
   },
   modalActions: {
     display: "flex",
     gap: "12px",
-    marginTop: "20px",
+    marginTop: "28px",
   },
   cancelBtn: {
     flex: 1,
-    padding: "10px",
-    border: "1px solid #cbd5e1",
+    padding: "12px 16px",
+    border: "1.5px solid #e2e8f0",
     background: "white",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
-    fontSize: "1rem",
+    fontSize: "0.95rem",
+    fontWeight: 700,
+    color: "#475569",
+    transition: "all 0.2s ease",
   },
   submitBtn: {
     flex: 1,
-    padding: "10px",
-    background: "#2563eb",
+    padding: "12px 16px",
+    background: "linear-gradient(135deg, #0f4c81 0%, #0b78b3 100%)",
     color: "white",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
-    fontSize: "1rem",
+    fontSize: "0.95rem",
+    fontWeight: 700,
+    transition: "all 0.2s ease",
   },
 };
 

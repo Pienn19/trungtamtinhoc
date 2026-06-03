@@ -1,0 +1,118 @@
+/* Admin Dashboard — BEM Stylesheet */
+
+.admin-dashboard__container {
+    padding: var(--space-2xl);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-dashboard__title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-3xl) 0;
+}
+
+.admin-dashboard__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-2xl);
+}
+
+/* Card Link */
+.admin-dashboard__card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.admin-dashboard__card {
+    background-color: white;
+    padding: var(--space-2xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.admin-dashboard__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+}
+
+.admin-dashboard__card:focus-within {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.admin-dashboard__card-icon {
+    font-size: var(--text-3xl);
+    line-height: 1;
+}
+
+.admin-dashboard__card-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.admin-dashboard__card-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--line-height-normal);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .admin-dashboard__grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--space-lg);
+    }
+
+    .admin-dashboard__container {
+        padding: var(--space-lg);
+    }
+
+    .admin-dashboard__title {
+        font-size: var(--text-2xl);
+        margin-bottom: var(--space-2xl);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard__grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .admin-dashboard__container {
+        padding: var(--space-lg);
+    }
+
+    .admin-dashboard__card {
+        padding: var(--space-lg);
+    }
+
+    .admin-dashboard__title {
+        font-size: var(--text-xl);
+    }
+
+    .admin-dashboard__card-title {
+        font-size: var(--text-base);
+    }
+
+    .admin-dashboard__card-description {
+        font-size: var(--text-xs);
+    }
+}

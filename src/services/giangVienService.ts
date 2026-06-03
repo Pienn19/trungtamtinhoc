@@ -14,7 +14,7 @@ export const giangVienService = {
     },
 
     // Create new instructor
-    createGiangVien: async (data: Omit<GiangVienDTO, 'idGiangVien'>) => {
+    createGiangVien: async (data: Omit<GiangVienDTO, 'idGiangVien'> & { tenDangNhap?: string; matKhau?: string }) => {
         return await axiosClient.post('/giangvien', data);
     },
 
@@ -55,4 +55,9 @@ export const teachingAssignmentService = {
     calculateInstructorCosts: async () => {
         return await axiosClient.get('/giangvien/chi-phi/tinh-theo-giang-vien');
     },
+
+    // Get my schedule (Instructor only)
+    getMySchedule: async () => {
+        return await axiosClient.get('/giangvien/my-schedule');
+    }
 };

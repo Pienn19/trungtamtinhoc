@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import axiosClient from '../../services/axiosClient'
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi'
+import { getCourseImageSrc } from '../../utils/imageHelper'
+import '../../styles/admin-course-management.css'
 
 interface KhoaHoc {
     idKhoaHoc: number
@@ -11,29 +14,46 @@ interface KhoaHoc {
     trangThai: string
 }
 
+const emptyForm = {
+    tenKhoaHoc: '',
+    thoiLuong: 0,
+    hocPhi: 0,
+    moTa: '',
+    anhDaiDien: '',
+    trangThai: 'Active',
+}
+
 const AdminCourseManagement = () => {
     const [courses, setCourses] = useState<KhoaHoc[]>([])
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
     const [editingId, setEditingId] = useState<number | null>(null)
-    const [formData, setFormData] = useState({
-        tenKhoaHoc: '',
-        thoiLuong: 0,
-        hocPhi: 0,
-        moTa: '',
-        anhDaiDien: '',
-        trangThai: 'Active'
-    })
+    const [imagePreview, setImagePreview] = useState('')
+    const [imageUploading, setImageUploading] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+    const [formError, setFormError] = useState('')
+    const [formData, setFormData] = useState(emptyForm)
 
     useEffect(() => {
-        fetchCourses()
+        void fetchCourses()
     }, [])
+
+    const isAllowedCertificateCourse = (course: KhoaHoc) => {
+        const normalizedName = course.tenKhoaHoc.toLowerCase()
+        return course.thoiLuong === 60
+            || course.thoiLuong === 90
+            || normalizedName.includes('basic')
+            || normalizedName.includes('advanced')
+            || normalizedName.includes('cơ bản')
+            || normalizedName.includes('nâng cao')
+    }
 
     const fetchCourses = async () => {
         try {
-            const response = await fetch('http://localhost:5025/api/khoahoc')
-            const data = await response.json()
-            setCourses(Array.isArray(data) ? data : [])
+            setLoading(true)
+            const response = await axiosClient.get('/khoahoc')
+            const data = Array.isArray(response.data) ? response.data : []
+            setCourses(data.filter(isAllowedCertificateCourse))
         } catch (error) {
             console.error('Error:', error)
         } finally {
@@ -41,51 +61,82 @@ const AdminCourseManagement = () => {
         }
     }
 
+    const resetForm = () => {
+        setShowForm(false)
+        setEditingId(null)
+        setImageUploading(false)
+        setFormData(emptyForm)
+        setImagePreview('')
+        setFormError('')
+    }
+
     const handleDelete = async (id: number) => {
         if (!window.confirm('Xác nhận xóa khóa học này?')) return
+
         try {
-            const token = localStorage.getItem('token')
-            await fetch(`http://localhost:5025/api/khoahoc/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            fetchCourses()
-        } catch (error) {
+            await axiosClient.delete(`/khoahoc/${id}`)
+            alert('Xóa khóa học thành công')
+            await fetchCourses()
+        } catch (error: any) {
             console.error('Error:', error)
+            const errorMessage = error?.response?.data?.message || 'Không thể xóa khóa học. Vui lòng thử lại.'
+            alert(errorMessage)
         }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleImageChange = async (file: File | null) => {
+        if (!file) {
+            setImagePreview('')
+            setFormData((current) => ({ ...current, anhDaiDien: '' }))
+            return
+        }
+
+        setImageUploading(true)
+        setFormError('')
+
         try {
-            const token = localStorage.getItem('token')
-            const method = editingId ? 'PUT' : 'POST'
-            const url = editingId
-                ? `http://localhost:5025/api/khoahoc/${editingId}`
-                : 'http://localhost:5025/api/khoahoc'
+            const uploadFormData = new FormData()
+            uploadFormData.append('file', file)
 
-            await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            })
+            const response = await axiosClient.post('/khoahoc/upload-image', uploadFormData)
+            const fileUrl = response.data?.fileUrl || ''
+            const fileName = response.data?.fileName || ''
 
-            setShowForm(false)
-            setEditingId(null)
-            setFormData({
-                tenKhoaHoc: '',
-                thoiLuong: 0,
-                hocPhi: 0,
-                moTa: '',
-                anhDaiDien: '',
-                trangThai: 'Active'
-            })
-            fetchCourses()
+            setImagePreview(fileUrl)
+            setFormData((current) => ({ ...current, anhDaiDien: fileName }))
+        } catch (error) {
+            console.error('Upload error:', error)
+            const message = (error as any)?.response?.data?.message || 'Không thể tải ảnh lên. Vui lòng thử file khác.'
+            setFormError(message)
+            setImagePreview('')
+            setFormData((current) => ({ ...current, anhDaiDien: '' }))
+        } finally {
+            setImageUploading(false)
+        }
+    }
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault()
+        setSubmitting(true)
+        setFormError('')
+
+        try {
+            const url = editingId ? `/khoahoc/${editingId}` : '/khoahoc'
+
+            if (editingId) {
+                await axiosClient.put(url, formData)
+            } else {
+                await axiosClient.post(url, formData)
+            }
+
+            resetForm()
+            await fetchCourses()
         } catch (error) {
             console.error('Error:', error)
+            const message = (error as any)?.response?.data?.message || 'Không thể lưu khóa học. Vui lòng thử lại.'
+            setFormError(message)
+        } finally {
+            setSubmitting(false)
         }
     }
 
@@ -96,137 +147,158 @@ const AdminCourseManagement = () => {
             hocPhi: course.hocPhi,
             moTa: course.moTa,
             anhDaiDien: course.anhDaiDien,
-            trangThai: course.trangThai
+            trangThai: course.trangThai,
         })
+        setImagePreview(getCourseImageSrc(course.anhDaiDien))
         setEditingId(course.idKhoaHoc)
+        setFormError('')
         setShowForm(true)
     }
 
-    const handleCancel = () => {
-        setShowForm(false)
-        setEditingId(null)
-        setFormData({
-            tenKhoaHoc: '',
-            thoiLuong: 0,
-            hocPhi: 0,
-            moTa: '',
-            anhDaiDien: '',
-            trangThai: 'Active'
-        })
-    }
-
     return (
-        <div style={{ maxWidth: '1200px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>📚 Quản Lý Khóa Học</h1>
-                <button
-                    onClick={() => setShowForm(!showForm)}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '10px 16px',
-                        background: '#0366d6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontWeight: '600',
-                        fontSize: '14px'
-                    }}
-                >
-                    <FiPlus size={18} /> Thêm Khóa Học
-                </button>
+        <div className="admin-course-management">
+            <div className="admin-course-management__header">
+                <h1 className="admin-course-management__title">📚 Quản Lý Khóa Học</h1>
+                <div className="admin-course-management__actions">
+                    <button
+                        onClick={() => setShowForm((current) => !current)}
+                        className="admin-course-management__btn admin-course-management__btn--primary"
+                        type="button"
+                    >
+                        <FiPlus size={18} /> Thêm Khóa Học
+                    </button>
+                </div>
             </div>
 
-            {/* Form */}
             {showForm && (
-                <div style={{
-                    background: 'white',
-                    padding: '20px',
-                    borderRadius: '8px',
-                    marginBottom: '30px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                }}>
+                <div className="admin-course-management__panel">
                     <form onSubmit={handleSubmit}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                            <input
-                                type="text"
-                                placeholder="Tên khóa học"
-                                value={formData.tenKhoaHoc}
-                                onChange={(e) => setFormData({ ...formData, tenKhoaHoc: e.target.value })}
-                                required
-                                style={{ padding: '10px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Thời lượng (giờ)"
-                                value={formData.thoiLuong}
-                                onChange={(e) => setFormData({ ...formData, thoiLuong: parseInt(e.target.value) })}
-                                required
-                                style={{ padding: '10px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Học phí (VND)"
-                                value={formData.hocPhi}
-                                onChange={(e) => setFormData({ ...formData, hocPhi: parseInt(e.target.value) })}
-                                required
-                                style={{ padding: '10px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
-                            />
-                            <select
-                                value={formData.trangThai}
-                                onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
-                                style={{ padding: '10px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
-                            >
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
+                        <div className="admin-course-management__form-grid">
+                            <div className="admin-course-management__field">
+                                <input
+                                    type="text"
+                                    placeholder="Tên khóa học"
+                                    value={formData.tenKhoaHoc}
+                                    onChange={(event) => setFormData({ ...formData, tenKhoaHoc: event.target.value })}
+                                    required
+                                    className="admin-course-management__input"
+                                />
+                            </div>
+                            <div className="admin-course-management__field">
+                                <input
+                                    type="number"
+                                    placeholder="Thời lượng (giờ)"
+                                    value={formData.thoiLuong}
+                                    onChange={(event) => setFormData({ ...formData, thoiLuong: Number(event.target.value) })}
+                                    required
+                                    className="admin-course-management__input"
+                                />
+                            </div>
+                            <div className="admin-course-management__field">
+                                <input
+                                    type="number"
+                                    placeholder="Học phí (VND)"
+                                    value={formData.hocPhi}
+                                    onChange={(event) => setFormData({ ...formData, hocPhi: Number(event.target.value) })}
+                                    required
+                                    className="admin-course-management__input"
+                                />
+                            </div>
+                            <div className="admin-course-management__field">
+                                <select
+                                    value={formData.trangThai}
+                                    onChange={(event) => setFormData({ ...formData, trangThai: event.target.value })}
+                                    className="admin-course-management__select"
+                                >
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
                         </div>
-                        <textarea
-                            placeholder="Mô tả khóa học"
-                            value={formData.moTa}
-                            onChange={(e) => setFormData({ ...formData, moTa: e.target.value })}
-                            required
-                            style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px', marginBottom: '16px', minHeight: '80px' }}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Tên ảnh đại diện (vd: flutter_basic.png)"
-                            value={formData.anhDaiDien}
-                            onChange={(e) => setFormData({ ...formData, anhDaiDien: e.target.value })}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px', marginBottom: '16px' }}
-                        />
-                        <div style={{ display: 'flex', gap: '8px' }}>
+
+                        <div className="admin-course-management__field admin-course-management__field--full">
+                            <textarea
+                                placeholder="Mô tả khóa học"
+                                value={formData.moTa}
+                                onChange={(event) => setFormData({ ...formData, moTa: event.target.value })}
+                                required
+                                className="admin-course-management__textarea"
+                            />
+                        </div>
+
+                        <div className="admin-course-management__field">
+                            <label className="admin-course-management__label">Ảnh đại diện từ máy</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => void handleImageChange(event.target.files?.[0] ?? null)}
+                                disabled={imageUploading}
+                                className="admin-course-management__input"
+                            />
+                            <div className="admin-course-management__note">
+                                Chọn ảnh từ máy tính, hệ thống sẽ lưu file lên server và chỉ giữ tên file ngắn trong cơ sở dữ liệu.
+                            </div>
+                        </div>
+
+                        {imageUploading && (
+                            <div className="admin-course-management__alert admin-course-management__alert--info">
+                                Đang tải ảnh lên hệ thống...
+                            </div>
+                        )}
+
+                        {imagePreview && (
+                            <div className="admin-course-management__image-row">
+                                <img
+                                    src={imagePreview}
+                                    alt="Xem trước ảnh đại diện"
+                                    className="admin-course-management__image-preview"
+                                />
+                                <div className="admin-course-management__image-caption">
+                                    <div className="admin-course-management__image-caption-title">Đã chọn ảnh</div>
+                                    <div>Ảnh sẽ được lưu cùng khóa học sau khi bấm lưu.</div>
+                                </div>
+                            </div>
+                        )}
+
+                        {!imagePreview && (
+                            <div className="admin-course-management__field admin-course-management__field--full">
+                                <input
+                                    type="text"
+                                    placeholder="Hoặc nhập tên ảnh / đường dẫn cũ nếu muốn dùng file có sẵn"
+                                    value={formData.anhDaiDien}
+                                    onChange={(event) => {
+                                        setFormData({ ...formData, anhDaiDien: event.target.value })
+                                        setImagePreview(getCourseImageSrc(event.target.value))
+                                    }}
+                                    className="admin-course-management__input"
+                                />
+                            </div>
+                        )}
+
+                        {imagePreview && formData.anhDaiDien && (
+                            <div className="admin-course-management__alert admin-course-management__alert--neutral">
+                                Ảnh đã lưu: <strong>{formData.anhDaiDien}</strong>
+                            </div>
+                        )}
+
+                        {formError && (
+                            <div className="admin-course-management__alert admin-course-management__alert--error">
+                                {formError}
+                            </div>
+                        )}
+
+                        <div className="admin-course-management__form-actions">
                             <button
                                 type="submit"
-                                style={{
-                                    padding: '10px 16px',
-                                    background: '#28a745',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px'
-                                }}
+                                disabled={submitting || imageUploading}
+                                className="admin-course-management__form-btn admin-course-management__form-btn--save"
                             >
-                                {editingId ? 'Cập Nhật' : 'Thêm'}
+                                {imageUploading ? 'Đang tải ảnh...' : submitting ? 'Đang lưu...' : editingId ? 'Cập Nhật' : 'Thêm'}
                             </button>
                             <button
                                 type="button"
-                                onClick={handleCancel}
-                                style={{
-                                    padding: '10px 16px',
-                                    background: '#6c757d',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px'
-                                }}
+                                onClick={resetForm}
+                                className="admin-course-management__form-btn admin-course-management__form-btn--cancel"
                             >
                                 Hủy
                             </button>
@@ -235,76 +307,55 @@ const AdminCourseManagement = () => {
                 </div>
             )}
 
-            {/* Table */}
             {loading ? (
-                <p>Đang tải...</p>
+                <div className="admin-course-management__empty">Đang tải...</div>
             ) : (
-                <div style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', fontSize: '14px', color: '#64748b' }}>ID</th>
-                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', fontSize: '14px', color: '#64748b' }}>Tên Khóa Học</th>
-                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', fontSize: '14px', color: '#64748b' }}>Thời Lượng</th>
-                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', fontSize: '14px', color: '#64748b' }}>Học Phí</th>
-                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', fontSize: '14px', color: '#64748b' }}>Trạng Thái</th>
-                                <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', fontSize: '14px', color: '#64748b' }}>Hành Động</th>
+                <div className="admin-course-management__table-card">
+                    <table className="admin-course-management__table">
+                        <thead className="admin-course-management__table-head">
+                            <tr className="admin-course-management__table-row">
+                                <th className="admin-course-management__table-header">ID</th>
+                                <th className="admin-course-management__table-header">Tên Khóa Học</th>
+                                <th className="admin-course-management__table-header">Thời Lượng</th>
+                                <th className="admin-course-management__table-header">Học Phí</th>
+                                <th className="admin-course-management__table-header">Trạng Thái</th>
+                                <th className="admin-course-management__table-header admin-course-management__table-actions">Hành Động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {courses.map(course => (
-                                <tr key={course.idKhoaHoc} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                    <td style={{ padding: '12px', fontSize: '14px' }}>{course.idKhoaHoc}</td>
-                                    <td style={{ padding: '12px', fontSize: '14px' }}>{course.tenKhoaHoc}</td>
-                                    <td style={{ padding: '12px', fontSize: '14px' }}>{course.thoiLuong} giờ</td>
-                                    <td style={{ padding: '12px', fontSize: '14px' }}>{course.hocPhi.toLocaleString()} VND</td>
-                                    <td style={{ padding: '12px', fontSize: '14px' }}>
-                                        <span style={{
-                                            padding: '4px 8px',
-                                            background: course.trangThai === 'Active' ? '#d4edda' : '#f8d7da',
-                                            color: course.trangThai === 'Active' ? '#155724' : '#721c24',
-                                            borderRadius: '4px',
-                                            fontSize: '12px',
-                                            fontWeight: '600'
-                                        }}>
+                            {courses.map((course) => (
+                                <tr key={course.idKhoaHoc} className="admin-course-management__table-row">
+                                    <td className="admin-course-management__table-cell">{course.idKhoaHoc}</td>
+                                    <td className="admin-course-management__table-cell">{course.tenKhoaHoc}</td>
+                                    <td className="admin-course-management__table-cell">{course.thoiLuong} giờ</td>
+                                    <td className="admin-course-management__table-cell">{course.hocPhi.toLocaleString()} VND</td>
+                                    <td className="admin-course-management__table-cell">
+                                        <span
+                                            className={`admin-course-management__status ${course.trangThai === 'Active'
+                                                ? 'admin-course-management__status--active'
+                                                : 'admin-course-management__status--inactive'
+                                                }`}
+                                        >
                                             {course.trangThai}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '12px', textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                        <button
-                                            onClick={() => handleEdit(course)}
-                                            style={{
-                                                padding: '6px 10px',
-                                                background: '#0366d6',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                fontSize: '12px'
-                                            }}
-                                        >
-                                            <FiEdit2 size={14} /> Sửa
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(course.idKhoaHoc)}
-                                            style={{
-                                                padding: '6px 10px',
-                                                background: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                fontSize: '12px'
-                                            }}
-                                        >
-                                            <FiTrash2 size={14} /> Xóa
-                                        </button>
+                                    <td className="admin-course-management__table-cell admin-course-management__table-actions">
+                                        <div className="admin-course-management__row-actions">
+                                            <button
+                                                onClick={() => handleEdit(course)}
+                                                className="admin-course-management__row-btn admin-course-management__row-btn--edit"
+                                                type="button"
+                                            >
+                                                <FiEdit2 size={14} /> Sửa
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(course.idKhoaHoc)}
+                                                className="admin-course-management__row-btn admin-course-management__row-btn--delete"
+                                                type="button"
+                                            >
+                                                <FiTrash2 size={14} /> Xóa
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

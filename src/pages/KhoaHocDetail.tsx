@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { getKhoaHocById } from "../services/api";
 import { type KhoaHoc } from "../types/KhoaHoc";
 import { useNavigate } from "react-router-dom";
+import { getCourseImageSrc } from "../utils/imageHelper";
+import { normalizeUserRole } from "../utils/authHelper";
 
 const KhoaHocDetail = () => {
   const navigate = useNavigate();
@@ -34,57 +36,59 @@ const KhoaHocDetail = () => {
   return (
     <div className="khoahoc-detail-wrapper">
 
-    <div className="khoahoc-banner">
-        <img src={`/images/${khoaHoc.anhDaiDien}`} />
-    </div>
+      <div className="khoahoc-banner">
+        <img src={getCourseImageSrc(khoaHoc.anhDaiDien)} />
+      </div>
 
-    <h1 className="khoahoc-title">
+      <h1 className="khoahoc-title">
         {khoaHoc.tenKhoaHoc}
-    </h1>
+      </h1>
 
-    <div className="khoahoc-meta">
-         Thời lượng: {khoaHoc.thoiLuong} giờ |
-         Học phí: {khoaHoc.hocPhi.toLocaleString()} VND |
-         Khai giảng: Liên hệ trung tâm
-    </div>
+      <div className="khoahoc-meta">
+        Thời lượng: {khoaHoc.thoiLuong} giờ |
+        Học phí: {khoaHoc.hocPhi.toLocaleString()} VND |
+        Khai giảng: Liên hệ trung tâm
+      </div>
 
-    <div className="khoahoc-section">
+      <div className="khoahoc-section">
         <h2>Giới thiệu khóa học</h2>
         <p>{khoaHoc.moTa}</p>
-    </div>
+      </div>
 
-    <div className="khoahoc-section">
+      <div className="khoahoc-section">
         <h2>Mô tả chi tiết</h2>
         <p>{khoaHoc.moTaChiTiet}</p>
-    </div>
+      </div>
 
-    <div className="khoahoc-section">
+      <div className="khoahoc-section">
         <h2>Nội dung chương trình học</h2>
         <p>{khoaHoc.loTrinh || "Nội dung chi tiết sẽ được cập nhật..."}</p>
-    </div>
+      </div>
 
-    <div className="khoahoc-section">
+      <div className="khoahoc-section">
         <h2>Đối tượng tham gia</h2>
         <p>{khoaHoc.doiTuong || "Sinh viên, người đi làm..."}</p>
-    </div>
+      </div>
 
-    <div className="khoahoc-section">
+      <div className="khoahoc-section">
         <h2>Cam kết sau khóa học</h2>
         <p>{khoaHoc.camKet || "Thành thạo kỹ năng thực hành..."}</p>
-    </div>
+      </div>
 
-    <div className="khoahoc-section">
+      <div className="khoahoc-section">
         <h2>Giảng viên phụ trách</h2>
         <p>Đội ngũ giảng viên nhiều năm kinh nghiệm thực tế.</p>
-    </div>
+      </div>
 
-    <div className="khoahoc-enroll-wrapper">
-      <button
-        className="khoahoc-enroll-btn"
-        onClick={() => navigate(`/dang-ky/${khoaHoc.idKhoaHoc}`)}
-         > Đăng ký khóa học
-     </button>
-    </div>
+      {normalizeUserRole(localStorage.getItem("userRole")) !== "GiangVien" && normalizeUserRole(localStorage.getItem("userRole")) !== "Admin" && (
+        <div className="khoahoc-enroll-wrapper">
+          <button
+            className="khoahoc-enroll-btn"
+            onClick={() => navigate(`/dang-ky-khoa-hoc/${khoaHoc.idKhoaHoc}`)}
+          > Đăng ký khóa học
+          </button>
+        </div>
+      )}
 
     </div>
   );

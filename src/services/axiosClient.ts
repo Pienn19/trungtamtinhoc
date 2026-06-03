@@ -1,10 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:5025/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "/api",
 });
 
 // Interceptor: tự động gắn JWT vào header
@@ -28,13 +25,16 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    const isAuthRequest = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/login');
 
-    if (error.response?.status === 401) {
-
+    if (error.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
+      localStorage.removeItem("userRole");
 
-      window.location.href = "/login";
+      if (window.location.pathname !== '/dang-nhap') {
+        window.location.href = "/dang-nhap";
+      }
     }
 
     return Promise.reject(error);

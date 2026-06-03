@@ -1,147 +1,125 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { register } from "../services/authService";
-import { type RegisterDTO } from "../types/Auth";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { register } from '../services/authService'
+import { type RegisterDTO } from '../types/Auth'
+import { toast } from 'react-toastify'
 
 const Register = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const [form, setForm] = useState<RegisterDTO>({
-    tenDangNhap: "",
-    matKhau: "",
-    hoTen: "",
-    email: "",
-    dienThoai: "",
-  });
+    tenDangNhap: '',
+    matKhau: '',
+    hoTen: '',
+    email: '',
+    dienThoai: '',
+  })
 
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
-    });
-  };
+    })
+  }
 
   const validateForm = () => {
     if (!form.tenDangNhap.trim()) {
-      setError("Vui lòng nhập tên đăng nhập");
-      return false;
+      toast.error('Vui lòng nhập tên đăng nhập')
+      return false
     }
     if (!form.matKhau || form.matKhau.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
-      return false;
+      toast.error('Mật khẩu phải có ít nhất 6 ký tự')
+      return false
     }
     if (form.matKhau !== confirmPassword) {
-      setError("Xác nhận mật khẩu không khớp");
-      return false;
+      toast.error('Xác nhận mật khẩu không khớp')
+      return false
     }
     if (!form.hoTen?.trim()) {
-      setError("Vui lòng nhập họ tên");
-      return false;
+      toast.error('Vui lòng nhập họ tên')
+      return false
     }
-    return true;
-  };
+    return true
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+    e.preventDefault()
+    if (!validateForm()) return
 
-    if (!validateForm()) return;
+    setIsLoading(true)
 
     try {
-      await register(form);
-      setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
+      await register(form)
+      toast.success('Đăng ký thành công! Vui lòng đăng nhập.')
       setTimeout(() => {
-        navigate("/dang-nhap");
-      }, 2000);
+        navigate('/dang-nhap')
+      }, 2000)
     } catch (err: any) {
-      console.error("Register error:", err);
-      setError(err.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại.");
+      console.error('Register error:', err)
+      toast.error(err.response?.data?.message || 'Đăng ký thất bại! Vui lòng thử lại.')
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div style={{ minHeight: "100vh", padding: "40px 20px", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ maxWidth: "450px", width: "100%", background: "white", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}>
-        <h1 style={{ fontSize: "2rem", marginBottom: "12px", color: "#1e293b", textAlign: "center" }}>Đăng ký</h1>
-        <p style={{ color: "#64748b", marginBottom: "32px", textAlign: "center" }}>Tạo tài khoản miễn phí</p>
+    <div className="page-shell" style={{ minHeight: 'calc(100vh - 120px)', display: 'grid', alignItems: 'center' }}>
+      <div className="surface-card" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(320px, 0.9fr)', overflow: 'hidden' }}>
+        <div style={{
+          padding: '42px',
+          backgroundImage: "linear-gradient(135deg, rgba(15,76,129,0.85) 0%, rgba(11,120,179,0.85) 100%), url('/images/register.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          color: '#fff'
+        }}>
+          <div className="muted-pill" style={{ background: 'rgba(255,255,255,0.14)', color: '#fff' }}>Tạo tài khoản</div>
+          <h1 style={{ fontSize: 'clamp(2rem, 3vw, 3rem)', margin: '14px 0 12px', lineHeight: 1.05 }}>Tham gia hệ thống học tập ngay hôm nay</h1>
+          <p style={{ maxWidth: 540, lineHeight: 1.8, color: 'rgba(255,255,255,0.9)' }}>
+            Đăng ký để quản lý lớp học, theo dõi học phí, nhận thông báo và sử dụng toàn bộ tính năng của trung tâm.
+          </p>
+          <div style={{ display: 'grid', gap: 12, marginTop: 26 }}>
+            <div style={{ padding: 16, borderRadius: 16, background: 'rgba(255,255,255,0.10)' }}>Hồ sơ học viên rõ ràng và an toàn</div>
+            <div style={{ padding: 16, borderRadius: 16, background: 'rgba(255,255,255,0.10)' }}>Đăng ký lớp, thanh toán và chứng chỉ online</div>
+          </div>
+        </div>
 
-        {error && <div style={{ color: "#ef4444", background: "#fee2e2", padding: "12px", borderRadius: "6px", marginBottom: "16px" }}>{error}</div>}
-        {success && <div style={{ color: "#16a34a", background: "#dcfce7", padding: "12px", borderRadius: "6px", marginBottom: "16px" }}>{success}</div>}
+        <div style={{ padding: '42px' }}>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px', color: '#0f172a' }}>Đăng ký</h2>
+          <p style={{ color: '#64748b', marginBottom: '28px' }}>Tạo tài khoản mới chỉ trong vài bước.</p>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
-            type="text"
-            name="tenDangNhap"
-            placeholder="Tên đăng nhập"
-            value={form.tenDangNhap}
-            onChange={handleChange}
-            required
-          />
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 14 }}>
+            <input className="auth-input" type="text" name="tenDangNhap" placeholder="Tên đăng nhập" value={form.tenDangNhap} onChange={handleChange} required disabled={isLoading} />
+            <input className="auth-input" type="text" name="hoTen" placeholder="Họ tên" value={form.hoTen || ''} onChange={handleChange} required disabled={isLoading} />
+            <input className="auth-input" type="email" name="email" placeholder="Email" value={form.email || ''} onChange={handleChange} disabled={isLoading} />
+            <input
+              className="auth-input"
+              type="tel"
+              name="dienThoai"
+              placeholder="Số điện thoại"
+              value={form.dienThoai || ''}
+              onChange={handleChange}
+              disabled={isLoading}
+              style={{ padding: '13px 14px', border: '1.5px solid #cfe0ee', borderRadius: 12, width: '100%', boxSizing: 'border-box' }}
+            />
+            <input className="auth-input" type="password" name="matKhau" placeholder="Mật khẩu" value={form.matKhau} onChange={handleChange} required disabled={isLoading} />
+            <input className="auth-input" type="password" placeholder="Xác nhận mật khẩu" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={isLoading} />
 
-          <input
-            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
-            type="text"
-            name="hoTen"
-            placeholder="Họ tên"
-            value={form.hoTen || ""}
-            onChange={handleChange}
-            required
-          />
+            <button type="submit" disabled={isLoading} className="auth-button">
+              {isLoading ? 'Đang xử lý...' : 'Tạo tài khoản'}
+            </button>
+          </form>
 
-          <input
-            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email || ""}
-            onChange={handleChange}
-          />
-
-          <input
-            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
-            type="tel"
-            name="dienThoai"
-            placeholder="Số điện thoại"
-            value={form.dienThoai || ""}
-            onChange={handleChange}
-          />
-
-          <input
-            style={{ width: "100%", padding: "12px", marginBottom: "12px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
-            type="password"
-            name="matKhau"
-            placeholder="Mật khẩu"
-            value={form.matKhau}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            style={{ width: "100%", padding: "12px", marginBottom: "20px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "1rem", boxSizing: "border-box" }}
-            type="password"
-            placeholder="Xác nhận mật khẩu"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-
-          <button type="submit" style={{ width: "100%", padding: "12px", background: "#2563eb", color: "white", border: "none", borderRadius: "6px", fontSize: "1rem", fontWeight: "600", cursor: "pointer" }}>
-            Tạo tài khoản
-          </button>
-        </form>
-
-        <p style={{ textAlign: "center", marginTop: "20px", color: "#64748b" }}>
-          Đã có tài khoản? <a href="/dang-nhap" style={{ color: "#2563eb", textDecoration: "none", fontWeight: "600" }}>Đăng nhập</a>
-        </p>
+          <p style={{ textAlign: 'center', marginTop: '18px', color: '#64748b' }}>
+            Đã có tài khoản? <a href="/dang-nhap" style={{ color: '#0b78b3', fontWeight: 700 }}>Đăng nhập ngay</a>
+          </p>
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

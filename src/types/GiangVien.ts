@@ -27,3 +27,30 @@ export type InstructorCostDTO = {
     soLopGiao: number;
     tongThiLo: number;
 };
+
+export type LichHocDTO = {
+    idLichHoc: number;
+    idLop: number;
+    idGiangVien?: number | null;
+    tenLop?: string | null;
+    tenGiangVien?: string | null;
+    ngay: string;
+    gioBatDau?: string | null;
+    gioKetThuc?: string | null;
+    loai?: string | null;
+    trangThai?: string | null;
+    diaDiem?: string | null;
+    ghiChu?: string | null;
+};
+
+export type CreateLichHocDTO = {
+    idLop: number;
+    idGiangVien: number;
+    ngay: string;
+    gioBatDau: string;
+    gioKetThuc: string;
+    loai?: string | null;
+    trangThai?: string | null;
+    diaDiem?: string | null;
+    ghiChu?: string | null;
+};

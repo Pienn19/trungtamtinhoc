@@ -1,9 +1,20 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
+import { logout } from "../services/authService";
 
 const AdminLayout = () => {
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      window.location.href = "/";
+    }
+  };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -14,7 +25,9 @@ const AdminLayout = () => {
         color: "white",
         padding: "20px",
         borderRight: "1px solid #334155",
-        boxShadow: "2px 0 10px rgba(0,0,0,0.1)"
+        boxShadow: "2px 0 10px rgba(0,0,0,0.1)",
+        display: "flex",
+        flexDirection: "column"
       }}>
         <h2 style={{ margin: "0 0 30px 0", fontSize: "24px", fontWeight: "700" }}>⚙️ Admin</h2>
 
@@ -23,13 +36,69 @@ const AdminLayout = () => {
           <MenuItem to="/admin/users" label="👥 Người dùng" active={isActive("/admin/users")} />
           <MenuItem to="/admin/khoa-hoc" label="📚 Quản lý khóa học" active={isActive("/admin/khoa-hoc")} />
           <MenuItem to="/admin/lop-hoc" label="🏫 Quản lý lớp học" active={isActive("/admin/lop-hoc")} />
-          <MenuItem to="/admin/dang-ky" label="📝 Đăng ký khóa học" active={isActive("/admin/dang-ky")} />
+          <MenuItem to="/admin/dang-ky" label="📝 Quản lý đăng ký lớp" active={isActive("/admin/dang-ky")} />
           <MenuItem to="/admin/thanh-toan" label="💳 Thanh toán" active={isActive("/admin/thanh-toan")} />
           <MenuItem to="/admin/giangvien" label="👨‍🏫 Giảng viên" active={isActive("/admin/giangvien")} />
-          <MenuItem to="/admin/diem-so" label="📊 Kết quả học tập" active={isActive("/admin/diem-so")} />
+          <MenuItem to="/admin/phong-thi" label="🏛️ Quản lý phòng thi" active={isActive("/admin/phong-thi")} />
+          <MenuItem to="/admin/lich-thi" label="📋 Quản lý lịch thi" active={isActive("/admin/lich-thi")} />
+          <MenuItem to="/admin/chung-chi" label="🎓 Chứng chỉ" active={isActive("/admin/chung-chi") || isActive("/admin/diem-so")} />
           <MenuItem to="/admin/chuyen-lop" label="🔄 Chuyển lớp" active={isActive("/admin/chuyen-lop")} />
           <MenuItem to="/admin/bao-cao" label="📈 Báo cáo & Thống kê" active={isActive("/admin/bao-cao")} />
         </nav>
+
+        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8, paddingTop: "30px" }}>
+          <Link
+            to="/"
+            style={{
+              display: "block",
+              padding: "12px 16px",
+              textDecoration: "none",
+              color: "#cbd5e1",
+              background: "transparent",
+              borderRadius: "6px",
+              fontWeight: "500",
+              fontSize: "14px",
+              border: "1px solid #475569",
+              textAlign: "center",
+              transition: "all 0.3s ease"
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.background = "rgba(71, 85, 105, 0.4)";
+              (e.target as HTMLElement).style.color = "#f1f5f9";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.background = "transparent";
+              (e.target as HTMLElement).style.color = "#cbd5e1";
+            }}
+          >
+            🌐 Về trang Web
+          </Link>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "12px 16px",
+              color: "#f87171",
+              background: "transparent",
+              borderRadius: "6px",
+              fontWeight: "500",
+              fontSize: "14px",
+              border: "1px solid #7f1d1d",
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all 0.3s ease"
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.background = "rgba(127, 29, 29, 0.4)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.background = "transparent";
+            }}
+          >
+            🚪 Đăng xuất
+          </button>
+        </div>
       </div>
 
       {/* Content */}

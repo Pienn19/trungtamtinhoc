@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { UserDTO, CreateUserDTO, UpdateUserDTO } from '../../types/Auth'
-import { getAllUsers, getUserById, createUser, updateUser, toggleUserStatus, resetUserPassword } from '../../services/adminUserService'
-import '../../styles/AdminUserManagement.css'
+import { getAllUsers, getUserById, createUser, updateUser, toggleUserStatus, resetUserPassword, deleteUser } from '../../services/adminUserService'
+import '../../styles/admin-user-management.css'
 
 type FormMode = 'list' | 'create' | 'edit'
 
@@ -70,12 +70,12 @@ export default function AdminUserManagement() {
                 hoTen: fullData.hoTen,
                 email: fullData.email,
                 dienThoai: fullData.dienThoai,
-                idVaiTro: 2
+                idVaiTro: fullData.idVaiTro || 2
             })
             setFormMode('edit')
             setMessage('')
             setError('')
-        } catch (err) {
+        } catch {
             setError('Không thể tải thông tin người dùng')
         }
     }
@@ -135,7 +135,13 @@ export default function AdminUserManagement() {
         try {
             await toggleUserStatus(user.idTaiKhoan, newStatus)
             setMessage(`Người dùng đã được ${statusText} thành công`)
-            loadUsers()
+
+            // Update state locally instead of reloading all users
+            setUsers(users.map(u =>
+                u.idTaiKhoan === user.idTaiKhoan
+                    ? { ...u, trangThai: newStatus }
+                    : u
+            ))
         } catch (err: any) {
             setError(err.response?.data?.message || 'Có lỗi xảy ra')
         }
@@ -159,6 +165,23 @@ export default function AdminUserManagement() {
             setNewPassword('')
         } catch (err: any) {
             setError(err.response?.data?.message || 'Có lỗi xảy ra')
+        }
+    }
+
+    const handleDeleteUser = async (user: UserDTO) => {
+        const confirmText = `Bạn chắc chắn muốn xóa người dùng ${user.tenDangNhap}? Hành động này không thể hoàn tác!`
+
+        if (!window.confirm(confirmText)) return
+
+        try {
+            setLoading(true)
+            await deleteUser(user.idTaiKhoan)
+            setMessage('Xóa người dùng thành công')
+            loadUsers()
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Có lỗi xảy ra khi xóa người dùng')
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -231,6 +254,12 @@ export default function AdminUserManagement() {
                                                 }}
                                             >
                                                 Reset MK
+                                            </button>
+                                            <button
+                                                className="btn btn-sm btn-danger"
+                                                onClick={() => handleDeleteUser(user)}
+                                            >
+                                                Xóa
                                             </button>
                                         </td>
                                     </tr>
@@ -315,6 +344,7 @@ export default function AdminUserManagement() {
                                     onChange={handleInputChange}
                                 >
                                     <option value={2}>Học viên</option>
+                                    <option value={3}>Giảng viên</option>
                                     <option value={1}>Quản trị viên</option>
                                 </select>
                             </div>

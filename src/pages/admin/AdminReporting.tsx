@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = "/api";
+
 interface OverviewStats {
     totalCourses: number;
     totalClasses: number;
@@ -55,14 +57,14 @@ const AdminReporting = () => {
             const headers = { Authorization: `Bearer ${token}` };
 
             const [ovRes, courseRes, revRes, gradeRes] = await Promise.all([
-                axios.get("http://localhost:5025/api/reporting/overview", { headers }),
-                axios.get("http://localhost:5025/api/reporting/course-statistics", {
+                axios.get(`${API_URL}/reporting/overview`, { headers }),
+                axios.get(`${API_URL}/reporting/course-statistics`, {
                     headers,
                 }),
-                axios.get("http://localhost:5025/api/reporting/revenue-statistics", {
+                axios.get(`${API_URL}/reporting/revenue-statistics`, {
                     headers,
                 }),
-                axios.get("http://localhost:5025/api/reporting/grade-distribution", {
+                axios.get(`${API_URL}/reporting/grade-distribution`, {
                     headers,
                 }),
             ]);
@@ -83,6 +85,24 @@ const AdminReporting = () => {
             style: "currency",
             currency: "VND",
         }).format(amount);
+    };
+
+    const getStatusColor = (status: string) => {
+        const normalized = status.toLowerCase();
+
+        if (normalized.includes("đã") || normalized.includes("hoàn") || normalized.includes("paid") || normalized.includes("complete")) {
+            return "#16a34a";
+        }
+
+        if (normalized.includes("chưa") || normalized.includes("pending")) {
+            return "#f59e0b";
+        }
+
+        if (normalized.includes("hủy") || normalized.includes("cancel") || normalized.includes("fail")) {
+            return "#ef4444";
+        }
+
+        return "#64748b";
     };
 
     if (loading) {
@@ -247,58 +267,95 @@ const AdminReporting = () => {
             {/* Revenue Tab */}
             {activeTab === "revenue" && revenueStats && (
                 <div style={styles.content}>
-                    <h2>Thống Kê Doanh Thu</h2>
+                    <div style={styles.sectionHeader}>
+                        <div>
+                            <h2 style={styles.sectionTitle}>Thống Kê Doanh Thu</h2>
+                            <p style={styles.sectionSubtitle}>
+                                Tổng hợp doanh thu theo trạng thái và phương thức thanh toán.
+                            </p>
+                        </div>
+                    </div>
+
                     <div style={styles.revenueSection}>
                         <div style={styles.revenueSummary}>
-                            <h3>Tổng Doanh Thu</h3>
-                            <p style={styles.revenueTotal}>
-                                {formatVND(revenueStats.totalRevenue)}
-                            </p>
+                            <div>
+                                <p style={styles.revenueEyebrow}>Tổng doanh thu đã ghi nhận</p>
+                                <p style={styles.revenueTotal}>{formatVND(revenueStats.totalRevenue)}</p>
+                            </div>
+
+                            <div style={styles.revenueSummaryMeta}>
+                                <div style={styles.revenueMiniStat}>
+                                    <span style={styles.revenueMiniLabel}>Trạng thái</span>
+                                    <strong>{revenueStats.byStatus.length}</strong>
+                                </div>
+                                <div style={styles.revenueMiniStat}>
+                                    <span style={styles.revenueMiniLabel}>Phương thức</span>
+                                    <strong>{revenueStats.byMethod.length}</strong>
+                                </div>
+                            </div>
                         </div>
 
                         <div style={styles.revenueCharts}>
                             <div style={styles.revenueChart}>
                                 <h3>Theo Trạng Thái Thanh Toán</h3>
-                                <table style={styles.table}>
-                                    <thead>
-                                        <tr style={styles.tableHeader}>
-                                            <th>Trạng Thái</th>
-                                            <th>Số Lượng</th>
-                                            <th>Tổng Tiền</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {revenueStats.byStatus.map((s) => (
-                                            <tr key={s.status} style={styles.tableRow}>
-                                                <td>{s.status}</td>
-                                                <td>{s.count}</td>
-                                                <td>{formatVND(s.totalAmount)}</td>
+                                {revenueStats.byStatus.length === 0 ? (
+                                    <div style={styles.emptyState}>Không có dữ liệu trạng thái thanh toán</div>
+                                ) : (
+                                    <table style={styles.table}>
+                                        <thead>
+                                            <tr style={styles.tableHeader}>
+                                                <th>Trạng Thái</th>
+                                                <th>Số Lượng</th>
+                                                <th>Tổng Tiền</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {revenueStats.byStatus.map((s) => (
+                                                <tr key={s.status} style={styles.tableRow}>
+                                                    <td>
+                                                        <span
+                                                            style={{
+                                                                ...styles.statusBadge,
+                                                                color: getStatusColor(s.status),
+                                                                backgroundColor: `${getStatusColor(s.status)}15`,
+                                                            }}
+                                                        >
+                                                            {s.status}
+                                                        </span>
+                                                    </td>
+                                                    <td>{s.count}</td>
+                                                    <td><strong>{formatVND(s.totalAmount)}</strong></td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
                             </div>
 
                             <div style={styles.revenueChart}>
                                 <h3>Theo Hình Thức Thanh Toán</h3>
-                                <table style={styles.table}>
-                                    <thead>
-                                        <tr style={styles.tableHeader}>
-                                            <th>Hình Thức</th>
-                                            <th>Số Lượng</th>
-                                            <th>Tổng Tiền</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {revenueStats.byMethod.map((m) => (
-                                            <tr key={m.method} style={styles.tableRow}>
-                                                <td>{m.method}</td>
-                                                <td>{m.count}</td>
-                                                <td>{formatVND(m.totalAmount)}</td>
+                                {revenueStats.byMethod.length === 0 ? (
+                                    <div style={styles.emptyState}>Không có dữ liệu phương thức thanh toán</div>
+                                ) : (
+                                    <table style={styles.table}>
+                                        <thead>
+                                            <tr style={styles.tableHeader}>
+                                                <th>Hình Thức</th>
+                                                <th>Số Lượng</th>
+                                                <th>Tổng Tiền</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {revenueStats.byMethod.map((m) => (
+                                                <tr key={m.method} style={styles.tableRow}>
+                                                    <td><strong>{m.method}</strong></td>
+                                                    <td>{m.count}</td>
+                                                    <td>{formatVND(m.totalAmount)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -399,8 +456,21 @@ const styles = {
     },
     content: {
         background: "white",
-        padding: "20px",
-        borderRadius: "8px",
+        padding: "24px",
+        borderRadius: "16px",
+        boxShadow: "0 10px 24px rgba(15, 23, 42, 0.05)",
+    },
+    sectionHeader: {
+        marginBottom: "16px",
+    },
+    sectionTitle: {
+        margin: 0,
+        fontSize: "22px",
+        color: "#0f172a",
+    },
+    sectionSubtitle: {
+        margin: "6px 0 0",
+        color: "#64748b",
     },
     statsGrid: {
         display: "grid",
@@ -442,19 +512,50 @@ const styles = {
         borderBottom: "1px solid #e5e7eb",
     },
     revenueSection: {
-        marginTop: "20px",
+        marginTop: "8px",
     },
     revenueSummary: {
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
         color: "white",
-        padding: "30px",
-        borderRadius: "8px",
-        marginBottom: "30px",
+        padding: "28px",
+        borderRadius: "18px",
+        marginBottom: "24px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        gap: "20px",
+        flexWrap: "wrap" as const,
+    },
+    revenueEyebrow: {
+        margin: 0,
+        fontSize: "13px",
+        fontWeight: 700,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase" as const,
+        opacity: 0.85,
     },
     revenueTotal: {
-        fontSize: "32px",
+        fontSize: "40px",
         fontWeight: "bold" as const,
         margin: "10px 0 0 0",
+    },
+    revenueSummaryMeta: {
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(120px, 1fr))",
+        gap: "12px",
+    },
+    revenueMiniStat: {
+        minWidth: "120px",
+        background: "rgba(255,255,255,0.12)",
+        border: "1px solid rgba(255,255,255,0.18)",
+        borderRadius: "14px",
+        padding: "14px",
+    },
+    revenueMiniLabel: {
+        display: "block",
+        fontSize: "12px",
+        opacity: 0.85,
+        marginBottom: "6px",
     },
     revenueCharts: {
         display: "grid",
@@ -462,9 +563,10 @@ const styles = {
         gap: "20px",
     },
     revenueChart: {
-        background: "#f9fafb",
+        background: "#f8fafc",
         padding: "20px",
-        borderRadius: "8px",
+        borderRadius: "16px",
+        border: "1px solid #e2e8f0",
     },
     progressBar: {
         background: "#e5e7eb",
@@ -475,6 +577,21 @@ const styles = {
     progressFill: {
         background: "#3b82f6",
         height: "100%",
+    },
+    statusBadge: {
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "6px 10px",
+        borderRadius: "999px",
+        fontSize: "13px",
+        fontWeight: 700,
+    },
+    emptyState: {
+        padding: "16px",
+        borderRadius: "12px",
+        border: "1px dashed #cbd5e1",
+        background: "#fff",
+        color: "#64748b",
     },
 };
 

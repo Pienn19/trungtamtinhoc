@@ -1,92 +1,55 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
 /* =================== */
 /* KHOA HOC DETAIL */
 /* =================== */
 
 .khoahoc-detail-wrapper {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 50px auto;
   padding: 0 20px;
 }
 
 .khoahoc-banner img {
   width: 100%;
-  height: 350px;
+  height: 380px;
   object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(15, 76, 129, 0.15);
 }
 
 .khoahoc-title {
-  margin-top: 25px;
-  font-size: 32px;
-  font-weight: 700;
-  color: #1e293b;
+  margin-top: 32px;
+  font-size: 36px;
+  font-weight: 900;
+  color: #0f4c81;
+  letter-spacing: -0.02em;
 }
 
 .khoahoc-meta {
-  margin-top: 10px;
-  padding: 15px 0;
-  border-bottom: 1px solid #ddd;
-  font-size: 16px;
-  color: #475569;
+  margin-top: 14px;
+  padding: 16px 0;
+  border-bottom: 2px solid rgba(11, 120, 179, 0.1);
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 600;
 }
 
 .khoahoc-section {
-  margin-top: 40px;
+  margin-top: 42px;
 }
 
 .khoahoc-section h2 {
-  font-size: 22px;
-  margin-bottom: 15px;
-  border-left: 4px solid #2563eb;
-  padding-left: 10px;
-  color: #1e293b;
+  font-size: 24px;
+  margin-bottom: 18px;
+  border-left: 5px solid #0b78b3;
+  padding-left: 14px;
+  color: #0f4c81;
+  font-weight: 800;
 }
 
 .khoahoc-section p {
-  line-height: 1.8;
-  color: #374151;
+  line-height: 1.9;
+  color: #475569;
+  font-size: 15px;
 }
 
 .khoahoc-enroll-wrapper {
@@ -95,66 +58,179 @@
 }
 
 .khoahoc-enroll-btn {
-  padding: 14px 40px;
+  padding: 16px 48px;
   font-size: 16px;
-  font-weight: 600;
-  background: #2563eb;
+  font-weight: 700;
+  background: #0055ff;
   color: white;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 85, 255, 0.28);
+  transition: all 0.3s ease;
 }
 
 .khoahoc-enroll-btn:hover {
-  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 85, 255, 0.38);
+}
+
+.khoahoc-enroll-btn:active {
+  transform: translateY(0);
 }
 
 /* LOGIN */
 
-.login-container{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:80vh;
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f5faff 100%);
+  padding: 20px;
 }
 
-.login-box{
-  width:400px;
-  padding:30px;
-  background:white;
-  border-radius:8px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
-  text-align:center;
+.login-box {
+  width: 100%;
+  max-width: 440px;
+  padding: 48px 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 76, 129, 0.15);
+  text-align: center;
 }
 
-.login-box h2{
-  margin-bottom:20px;
-  color:#1f2d3d;
+.login-box h2 {
+  margin-bottom: 12px;
+  color: #0f4c81;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
 }
 
-.login-box input{
-  width:100%;
-  padding:12px;
-  margin-bottom:15px;
-  border:1px solid #ccc;
-  border-radius:5px;
+.login-box p {
+  color: #64748b;
+  margin-bottom: 32px;
+  font-weight: 500;
 }
 
-.login-box button{
-  width:100%;
-  padding:12px;
-  background:#1f3c88;
-  color:white;
-  border:none;
-  border-radius:5px;
-  font-weight:bold;
-  cursor:pointer;
+.login-box input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
-.login-box button:hover{
-  background:#162f6a;
+.login-box input:focus {
+  outline: none;
+  border-color: #0b78b3;
+  box-shadow: 0 0 0 3px rgba(11, 120, 179, 0.1);
 }
 
-.login-error{
-  color:red;
-  margin-bottom:10px;
+.login-box button {
+  width: 100%;
+  padding: 14px 16px;
+  margin-top: 8px;
+  background: #0055ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(0, 85, 255, 0.28);
+}
+
+.login-box button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 85, 255, 0.38);
+}
+
+.login-box button:active {
+  transform: translateY(0);
+}
+
+.login-error {
+  color: #be123c;
+  margin-bottom: 16px;
+  background: #ffe4e6;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* =================== */
+/* COURSE CARDS */
+/* =================== */
+
+div[style*="border: 1px solid #e5e7eb"]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 152, 212, 0.15);
+  border-color: #0098d4;
+}
+
+div[style*="border: 1px solid #e5e7eb"] img {
+  transition: transform 0.35s ease;
+}
+
+div[style*="border: 1px solid #e5e7eb"]:hover img {
+  transform: scale(1.06);
+}
+
+.course-button {
+  transition: all 0.3s ease !important;
+}
+
+.course-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 85, 255, 0.35) !important;
+}
+
+.course-button:active {
+  transform: translateY(0);
+}
+
+/* =================== */
+/* FORM STYLES */
+/* =================== */
+
+input:focus,
+textarea:focus,
+select:focus {
+  transition: all 0.3s ease;
+  border-color: #0098d4 !important;
+  box-shadow: 0 0 0 3px rgba(0, 152, 212, 0.1) !important;
+}
+
+button {
+  transition: all 0.3s ease;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =================== */
+/* RESPONSIVE */
+/* =================== */
+
+@media (max-width: 768px) {
+  .khoahoc-title {
+    font-size: 28px;
+  }
+
+  .login-box {
+    max-width: 100%;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
 }

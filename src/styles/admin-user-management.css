@@ -1,0 +1,171 @@
+/* Admin User Management — token overrides for existing layout */
+
+@import './AdminUserManagement.css';
+
+:root {
+    --admin-user-primary: var(--color-primary);
+    --admin-user-primary-hover: var(--color-primary-dark);
+    --admin-user-danger: var(--color-error);
+    --admin-user-danger-hover: #b91c1c;
+    --admin-user-success-bg: #d1fae5;
+    --admin-user-success-text: #065f46;
+    --admin-user-error-bg: #fee2e2;
+    --admin-user-error-text: #7f1d1d;
+    --admin-user-surface: var(--color-surface);
+    --admin-user-border: var(--color-border);
+    --admin-user-text: var(--color-text-primary);
+    --admin-user-text-secondary: var(--color-text-secondary);
+}
+
+.admin-container {
+    background: var(--admin-user-surface);
+}
+
+.admin-header h1,
+.form-header h2 {
+    color: var(--admin-user-text);
+}
+
+.alert-success {
+    background: var(--admin-user-success-bg);
+    color: var(--admin-user-success-text);
+    border-left-color: var(--color-success);
+}
+
+.alert-error {
+    background: var(--admin-user-error-bg);
+    color: var(--admin-user-error-text);
+    border-left-color: var(--color-error);
+}
+
+.table-responsive,
+.admin-form,
+.modal-content {
+    border-color: var(--admin-user-border);
+}
+
+.users-table thead,
+.users-table th,
+.modal-header,
+.modal-footer {
+    background: #f8fafc;
+}
+
+.users-table th {
+    color: var(--admin-user-text-secondary);
+}
+
+.users-table td {
+    color: var(--admin-user-text-secondary);
+}
+
+.badge {
+    background: var(--admin-user-primary);
+}
+
+.status-badge.active {
+    background: var(--admin-user-success-bg);
+    color: var(--admin-user-success-text);
+}
+
+.status-badge.inactive {
+    background: var(--admin-user-error-bg);
+    color: var(--admin-user-error-text);
+}
+
+.btn-primary {
+    background: var(--admin-user-primary);
+}
+
+.btn-primary:hover {
+    background: var(--admin-user-primary-hover);
+}
+
+.btn-secondary {
+    background: var(--color-text-secondary);
+}
+
+.btn-secondary:hover {
+    background: #475569;
+}
+
+.btn-edit {
+    background: var(--color-success);
+}
+
+.btn-edit:hover {
+    background: #059669;
+}
+
+.btn-lock {
+    background: var(--color-error);
+}
+
+.btn-lock:hover {
+    background: #b91c1c;
+}
+
+.btn-unlock {
+    background: var(--color-warning);
+}
+
+.btn-unlock:hover {
+    background: #d97706;
+}
+
+.btn-reset {
+    background: #8b5cf6;
+}
+
+.btn-reset:hover {
+    background: #7c3aed;
+}
+
+.btn-danger {
+    background: var(--admin-user-danger);
+}
+
+.btn-danger:hover {
+    background: var(--admin-user-danger-hover);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--admin-user-primary);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.close-btn {
+    color: var(--admin-user-text-secondary);
+}
+
+.close-btn:hover {
+    color: var(--admin-user-text);
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .admin-header h1 {
+        font-size: var(--text-xl);
+    }
+
+    .form-actions,
+    .modal-footer,
+    .actions {
+        flex-direction: column;
+    }
+
+    .btn,
+    .form-actions .btn,
+    .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

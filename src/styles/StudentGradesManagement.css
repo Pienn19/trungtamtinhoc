@@ -1,111 +1,132 @@
 .student-grades-management {
-    padding: 20px;
-    background: #f5f5f5;
+    padding: var(--space-2xl);
+    background: var(--color-surface);
     min-height: 100vh;
 }
 
 .student-grades-management h2 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 28px;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2xl);
+    font-size: var(--text-3xl);
+}
+
+.student-grades-management__create-section {
+    margin-bottom: var(--space-3xl);
+}
+
+.student-grades-management__create-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-md);
+}
+
+.student-grades-management__create-actions {
+    margin-top: var(--space-md);
 }
 
 .class-selector {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    background: var(--color-bg);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-2xl);
     display: flex;
     align-items: center;
-    gap: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    gap: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
 }
 
 .class-selector label {
     font-weight: 600;
-    color: #333;
+    color: var(--color-text-primary);
     min-width: 120px;
 }
 
 .class-selector select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
     min-width: 250px;
     font-family: inherit;
 }
 
-/* Statistics Section */
+.class-selector select:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-color: var(--color-primary);
+}
+
 .statistics-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: var(--color-bg);
+    padding: var(--space-2xl);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-2xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
 }
 
 .statistics-section h3 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 18px;
+    margin: 0 0 var(--space-lg) 0;
+    color: var(--color-text-primary);
+    font-size: var(--text-lg);
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+    gap: var(--space-lg);
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+    color: var(--color-bg);
+    padding: var(--space-2xl);
+    border-radius: var(--radius-md);
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card.success {
-    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-    color: #333;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: var(--color-bg);
 }
 
 .stat-card.danger {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: #333;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: var(--color-bg);
 }
 
 .stat-label {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 8px;
+    font-size: var(--text-xs);
+    opacity: 0.95;
+    margin-bottom: var(--space-sm);
     font-weight: 500;
 }
 
 .stat-value {
-    font-size: 28px;
+    font-size: var(--text-3xl);
     font-weight: 700;
 }
 
-/* Results Section */
 .results-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: var(--color-bg);
+    padding: var(--space-2xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
 }
 
 .results-section h3 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 18px;
+    margin: 0 0 var(--space-lg) 0;
+    color: var(--color-text-primary);
+    font-size: var(--text-lg);
 }
 
 .no-data {
     text-align: center;
-    color: #999;
-    padding: 20px;
+    color: var(--color-text-secondary);
+    padding: var(--space-2xl);
     font-style: italic;
 }
 
@@ -113,33 +134,33 @@
     overflow-x: auto;
 }
 
-table {
+.student-grades-management table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: var(--text-sm);
 }
 
-thead {
-    background: #f5f5f5;
-    border-top: 2px solid #ddd;
-    border-bottom: 2px solid #ddd;
+.student-grades-management thead {
+    background: var(--color-surface);
+    border-top: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
 }
 
-th {
-    padding: 12px;
+.student-grades-management th {
+    padding: var(--space-md);
     text-align: left;
     font-weight: 600;
-    color: #333;
+    color: var(--color-text-primary);
 }
 
-td {
-    padding: 12px;
+.student-grades-management td {
+    padding: var(--space-md);
     border-bottom: 1px solid #eee;
-    color: #666;
+    color: var(--color-text-secondary);
 }
 
-tbody tr:hover {
-    background: #f9f9f9;
+.student-grades-management tbody tr:hover {
+    background: var(--color-surface);
 }
 
 .text-center {
@@ -148,14 +169,14 @@ tbody tr:hover {
 
 .font-bold {
     font-weight: 600;
-    color: #0066cc;
+    color: var(--color-info);
 }
 
 .badge {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
     font-weight: 600;
 }
 
@@ -169,38 +190,40 @@ tbody tr:hover {
     color: #721c24;
 }
 
-.btn-edit {
-    padding: 6px 12px;
-    background: #4CAF50;
-    color: white;
+.btn-edit,
+.btn-delete,
+.btn-primary,
+.btn-secondary {
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
-    margin-right: 5px;
-    transition: background 0.3s;
+    transition: all var(--transition-base);
+}
+
+.btn-edit,
+.btn-delete {
+    padding: 6px 12px;
+    color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+}
+
+.btn-edit {
+    background: var(--color-success);
+    margin-right: var(--space-sm);
 }
 
 .btn-edit:hover {
-    background: #45a049;
+    background: #15803d;
 }
 
 .btn-delete {
-    padding: 6px 12px;
-    background: #f44336;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background 0.3s;
+    background: var(--color-error);
 }
 
 .btn-delete:hover {
-    background: #da190b;
+    background: #b91c1c;
 }
 
-/* Modal */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -215,89 +238,87 @@ tbody tr:hover {
 }
 
 .modal {
-    background: white;
-    border-radius: 8px;
-    padding: 30px;
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3xl);
     max-width: 400px;
     width: 90%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-lg);
 }
 
 .modal h3 {
     margin-top: 0;
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 20px;
+    margin-bottom: var(--space-xl);
+    color: var(--color-text-primary);
+    font-size: var(--text-xl);
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: var(--space-lg);
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    color: #333;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
     font-weight: 500;
-    font-size: 14px;
+    font-size: var(--text-sm);
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
     font-family: inherit;
     box-sizing: border-box;
-    transition: border 0.3s;
+    transition: border-color var(--transition-base);
 }
 
 .form-group input:focus {
-    outline: none;
-    border-color: #0066cc;
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
 .modal-buttons {
     display: flex;
-    gap: 10px;
-    margin-top: 25px;
+    gap: var(--space-md);
+    margin-top: var(--space-2xl);
     justify-content: flex-end;
 }
 
-.btn-primary {
-    padding: 10px 16px;
-    background: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.btn-primary,
+.btn-secondary {
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-bg);
+    border-radius: var(--radius-sm);
     font-weight: 500;
-    transition: background 0.3s;
+}
+
+.btn-primary {
+    background: var(--color-primary);
 }
 
 .btn-primary:hover {
-    background: #0052a3;
+    background: var(--color-primary-dark);
 }
 
 .btn-secondary {
-    padding: 10px 16px;
-    background: #666;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.3s;
+    background: var(--color-text-secondary);
 }
 
 .btn-secondary:hover {
-    background: #555;
+    background: #475569;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
+    .student-grades-management {
+        padding: var(--space-lg);
+    }
+
     .class-selector {
         flex-direction: column;
         align-items: flex-start;
@@ -305,33 +326,43 @@ tbody tr:hover {
 
     .class-selector select {
         width: 100%;
+        min-width: 100%;
     }
 
     .stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 10px;
+        gap: var(--space-md);
     }
 
     .stat-card {
-        padding: 15px;
+        padding: var(--space-lg);
     }
 
     .stat-value {
-        font-size: 20px;
+        font-size: var(--text-xl);
     }
 
-    table {
-        font-size: 12px;
+    .student-grades-management table {
+        font-size: var(--text-xs);
     }
 
-    th,
-    td {
-        padding: 8px;
+    .student-grades-management th,
+    .student-grades-management td {
+        padding: var(--space-sm);
     }
 
     .btn-edit,
     .btn-delete {
         padding: 4px 8px;
         font-size: 11px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
     }
 }

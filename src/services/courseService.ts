@@ -1,6 +1,7 @@
 import type { KhoaHocDTO, KhoaHocDetailDTO, LopHocDTO } from '../types/KhoaHoc'
+import { API_BASE_URL } from './apiBase'
 
-const API_URL = 'http://localhost:5025/api'
+const API_URL = API_BASE_URL
 
 /**
  * Feature #2: Course Service

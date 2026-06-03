@@ -34,3 +34,8 @@ export const resetUserPassword = async (userId: number, newPassword: string): Pr
     });
     return res.data;
 };
+
+export const deleteUser = async (userId: number): Promise<{ message: string }> => {
+    const res = await axiosClient.delete(`/admin/users/${userId}`);
+    return res.data;
+};
