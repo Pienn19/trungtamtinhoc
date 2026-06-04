@@ -8,8 +8,8 @@ export default function InstructorGradesManagement() {
     const [selectedClassId, setSelectedClassId] = useState<number>(0)
     const [selectedRegistrationId, setSelectedRegistrationId] = useState<number>(0)
     const [studentQuery, setStudentQuery] = useState('')
-    const [diemChuyenCan, setDiemChuyenCan] = useState('')
-    const [diemThi, setDiemThi] = useState('')
+    const [diemLyThuyet, setDiemLyThuyet] = useState('')
+    const [diemThucHanh, setDiemThucHanh] = useState('')
     const [loading, setLoading] = useState(true)
     const [loadingStudents, setLoadingStudents] = useState(false)
     const [saving, setSaving] = useState(false)
@@ -56,13 +56,13 @@ export default function InstructorGradesManagement() {
 
     useEffect(() => {
         if (!selectedStudent) {
-            setDiemChuyenCan('')
-            setDiemThi('')
+            setDiemLyThuyet('')
+            setDiemThucHanh('')
             return
         }
 
-        setDiemChuyenCan(selectedStudent.diemChuyenCan?.toString() ?? '')
-        setDiemThi(selectedStudent.diemThi?.toString() ?? '')
+        setDiemLyThuyet(selectedStudent.diemLyThuyet?.toString() ?? '')
+        setDiemThucHanh(selectedStudent.diemThucHanh?.toString() ?? '')
     }, [selectedStudent])
 
     async function loadClasses() {
@@ -161,16 +161,16 @@ export default function InstructorGradesManagement() {
             return
         }
 
-        const parsedChuyenCan = diemChuyenCan === '' ? undefined : Number(diemChuyenCan)
-        const parsedThi = diemThi === '' ? undefined : Number(diemThi)
+        const parsedLyThuyet = diemLyThuyet === '' ? undefined : Number(diemLyThuyet)
+        const parsedThucHanh = diemThucHanh === '' ? undefined : Number(diemThucHanh)
 
-        if (parsedChuyenCan !== undefined && (Number.isNaN(parsedChuyenCan) || parsedChuyenCan < 0 || parsedChuyenCan > 10)) {
-            alert('Điểm chuyên cần phải từ 0 đến 10')
+        if (parsedLyThuyet !== undefined && (Number.isNaN(parsedLyThuyet) || parsedLyThuyet < 0 || parsedLyThuyet > 10)) {
+            alert('Điểm lý thuyết phải từ 0 đến 10')
             return
         }
 
-        if (parsedThi !== undefined && (Number.isNaN(parsedThi) || parsedThi < 0 || parsedThi > 10)) {
-            alert('Điểm thi phải từ 0 đến 10')
+        if (parsedThucHanh !== undefined && (Number.isNaN(parsedThucHanh) || parsedThucHanh < 0 || parsedThucHanh > 10)) {
+            alert('Điểm thực hành phải từ 0 đến 10')
             return
         }
 
@@ -178,15 +178,15 @@ export default function InstructorGradesManagement() {
             setSaving(true)
             if (selectedStudent?.idKetQua) {
                 await ketQuaHocTapService.updateResult(selectedStudent.idKetQua, {
-                    diemChuyenCan: parsedChuyenCan,
-                    diemThi: parsedThi,
+                    diemLyThuyet: parsedLyThuyet,
+                    diemThucHanh: parsedThucHanh,
                 })
                 alert('Cập nhật kết quả học tập thành công')
             } else {
                 await ketQuaHocTapService.createResult({
                     idDangKy: selectedRegistrationId,
-                    diemChuyenCan: parsedChuyenCan,
-                    diemThi: parsedThi,
+                    diemLyThuyet: parsedLyThuyet,
+                    diemThucHanh: parsedThucHanh,
                 })
                 alert('Thêm kết quả học tập thành công')
             }
@@ -311,29 +311,29 @@ export default function InstructorGradesManagement() {
 
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 16 }}>
                 <div>
-                    <label>Điểm chuyên cần</label>
+                    <label>Điểm lý thuyết</label>
                     <input
                         type="number"
                         min="0"
                         max="10"
                         step="0.5"
-                        value={diemChuyenCan}
-                        onChange={(e) => setDiemChuyenCan(e.target.value)}
+                        value={diemLyThuyet}
+                        onChange={(e) => setDiemLyThuyet(e.target.value)}
                         style={{ width: '100%', padding: 10, marginTop: 6 }}
-                        placeholder="Nhập điểm chuyên cần"
+                        placeholder="Nhập điểm lý thuyết"
                     />
                 </div>
                 <div>
-                    <label>Điểm thi</label>
+                    <label>Điểm thực hành</label>
                     <input
                         type="number"
                         min="0"
                         max="10"
                         step="0.5"
-                        value={diemThi}
-                        onChange={(e) => setDiemThi(e.target.value)}
+                        value={diemThucHanh}
+                        onChange={(e) => setDiemThucHanh(e.target.value)}
                         style={{ width: '100%', padding: 10, marginTop: 6 }}
-                        placeholder="Nhập điểm thi"
+                        placeholder="Nhập điểm thực hành"
                     />
                 </div>
             </div>
@@ -352,8 +352,8 @@ export default function InstructorGradesManagement() {
                             <tr>
                                 <th>Học viên</th>
                                 <th>Email</th>
-                                <th>Điểm CC</th>
-                                <th>Điểm thi</th>
+                                <th>Điểm lý thuyết</th>
+                                <th>Điểm thực hành</th>
                                 <th>Điểm TB</th>
                                 <th>Kết luận</th>
                             </tr>
@@ -370,8 +370,8 @@ export default function InstructorGradesManagement() {
                                     <tr key={student.idDangKy}>
                                         <td>{student.hoTenHocVien || '-'}</td>
                                         <td>{student.emailHocVien || '-'}</td>
-                                        <td>{student.diemChuyenCan?.toFixed(1) || '-'}</td>
-                                        <td>{student.diemThi?.toFixed(1) || '-'}</td>
+                                        <td>{student.diemLyThuyet?.toFixed(1) || '-'}</td>
+                                        <td>{student.diemThucHanh?.toFixed(1) || '-'}</td>
                                         <td>{student.diemTrungBinh?.toFixed(2) || '-'}</td>
                                         <td>{student.ketLuan || 'Chưa nhập'}</td>
                                     </tr>

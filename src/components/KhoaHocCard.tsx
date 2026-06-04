@@ -33,8 +33,8 @@ const KhoaHocCard = ({ khoaHoc }: Props) => {
           </div>
           <button
             style={styles.primaryButton}
-            className="course-button"
-            onClick={() => navigate('/dang-ky-khoa-hoc')}
+            onClick={() => navigate(`/dang-ky-khoa-hoc/${khoaHoc.idKhoaHoc}`)}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Chi tiết khóa học
           </button>

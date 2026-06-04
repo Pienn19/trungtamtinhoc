@@ -110,7 +110,7 @@ export default function CourseList() {
                                 </div>
 
                                 <div style={{ display: 'grid', gap: 10 }}>
-                                    <button className="btn-view-detail" onClick={() => navigate('/dang-ky-khoa-hoc')}>
+                                    <button className="btn-view-detail" onClick={() => navigate(`/dang-ky-khoa-hoc/${course.idKhoaHoc}`)}>
                                         Đăng ký lớp
                                     </button>
                                     <button className="btn-view-detail secondary" onClick={() => navigate(`/khoa-hoc/${course.idKhoaHoc}`)}>

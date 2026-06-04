@@ -189,6 +189,16 @@ export default function MyRegistrations() {
                                                 Thanh Toán
                                             </button>
                                         )}
+                                        
+                                        {paymentStatus !== 'Chưa' && (
+                                            <button
+                                                className="btn-pay"
+                                                style={{ backgroundColor: '#2e7d32' }}
+                                                onClick={() => handlePayment(reg.idDangKy)}
+                                            >
+                                                Xem Hóa Đơn
+                                            </button>
+                                        )}
 
                                         <button
                                             className="btn-cancel"
