@@ -51,6 +51,8 @@ export interface LopHocDTO {
     ngayHocTrongTuan?: string
     gioBatDau?: string
     gioKetThuc?: string
+    isConflict?: boolean
+    conflictMessage?: string
 }
 
 export interface DangKyDTO {

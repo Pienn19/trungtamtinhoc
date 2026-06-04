@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import type { KhoaHocDetailDTO, LopHocDTO } from '../types/KhoaHoc'
 import { getCourseDetail, formatVND, formatDate } from '../services/courseService'
 import { getCourseImageSrc } from '../utils/imageHelper'
+import { isAuthenticated } from '../services/authService'
 import { normalizeUserRole } from '../utils/authHelper'
 import '../styles/CourseDetail.css'
 
@@ -12,6 +13,7 @@ export default function CourseDetail() {
     const [course, setCourse] = useState<KhoaHocDetailDTO | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [hideConflicts, setHideConflicts] = useState(true)
 
     useEffect(() => {
         void loadCourse()
@@ -145,21 +147,35 @@ export default function CourseDetail() {
 
             <section className="course-detail-classes">
                 <div className="section-head">
-                    <div>
-                        <div className="muted-pill">Danh sách lớp học</div>
-                        <h2 className="section-title" style={{ marginTop: 10 }}>Chọn lớp phù hợp</h2>
-                        <p className="section-subtitle">Mỗi lớp hiển thị sĩ số, số chỗ còn lại và trạng thái mở đăng ký.</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <div className="muted-pill">Danh sách lớp học</div>
+                            <h2 className="section-title" style={{ marginTop: 10 }}>Chọn lớp phù hợp</h2>
+                            <p className="section-subtitle">Mỗi lớp hiển thị sĩ số, số chỗ còn lại và trạng thái mở đăng ký.</p>
+                        </div>
+                        {isAuthenticated() && (
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                <input type="checkbox" checked={hideConflicts} onChange={e => setHideConflicts(e.target.checked)} />
+                                Chỉ hiện lớp không trùng lịch
+                            </label>
+                        )}
                     </div>
                 </div>
 
                 {course.lopHocs && course.lopHocs.length > 0 ? (
                     <div className="classes-grid">
-                        {course.lopHocs.map((lophoc: LopHocDTO) => (
+                        {course.lopHocs.filter(l => !hideConflicts || !l.isConflict).map((lophoc: LopHocDTO) => (
                             <div key={lophoc.idLop} className="surface-card class-card">
                                 <div className="class-card-head">
                                     <h4>{lophoc.tenLop}</h4>
                                     <span className={`status ${lophoc.trangThai.toLowerCase()}`}>{lophoc.trangThai}</span>
                                 </div>
+                                
+                                {lophoc.isConflict && (
+                                    <div style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '10px' }}>
+                                        ⚠️ {lophoc.conflictMessage}
+                                    </div>
+                                )}
 
                                 <div className="class-info">
                                     <div className="info-row">

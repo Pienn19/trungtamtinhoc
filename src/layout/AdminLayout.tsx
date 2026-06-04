@@ -38,7 +38,7 @@ const AdminLayout = () => {
           <MenuItem to="/admin/lop-hoc" label="🏫 Quản lý lớp học" active={isActive("/admin/lop-hoc")} />
           <MenuItem to="/admin/dang-ky" label="📝 Quản lý đăng ký lớp" active={isActive("/admin/dang-ky")} />
           <MenuItem to="/admin/thanh-toan" label="💳 Thanh toán" active={isActive("/admin/thanh-toan")} />
-          <MenuItem to="/admin/giangvien" label="👨‍🏫 Giảng viên" active={isActive("/admin/giangvien")} />
+          <MenuItem to="/admin/giangvien" label="👨‍🏫 Giảng viên & Lịch học" active={isActive("/admin/giangvien")} />
           <MenuItem to="/admin/phong-thi" label="🏛️ Quản lý phòng thi" active={isActive("/admin/phong-thi")} />
           <MenuItem to="/admin/lich-thi" label="📋 Quản lý lịch thi" active={isActive("/admin/lich-thi")} />
           <MenuItem to="/admin/chung-chi" label="🎓 Chứng chỉ" active={isActive("/admin/chung-chi") || isActive("/admin/diem-so")} />
