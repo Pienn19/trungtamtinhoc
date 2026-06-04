@@ -5,6 +5,8 @@ import { getCourseDetail, formatVND, formatDate } from '../services/courseServic
 import { getCourseImageSrc } from '../utils/imageHelper'
 import { isAuthenticated } from '../services/authService'
 import { normalizeUserRole } from '../utils/authHelper'
+import { registerClass } from '../services/registrationService'
+import { toast } from 'react-toastify'
 import '../styles/CourseDetail.css'
 
 export default function CourseDetail() {
@@ -14,6 +16,7 @@ export default function CourseDetail() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [hideConflicts, setHideConflicts] = useState(true)
+    const [registeringLop, setRegisteringLop] = useState<number | null>(null)
 
     useEffect(() => {
         void loadCourse()
@@ -33,13 +36,31 @@ export default function CourseDetail() {
         }
     }
 
-    const handleRegister = () => {
-        if (!id) {
-            navigate('/dang-ky-khoa-hoc')
+    const handleRegister = async (idLop: number) => {
+        if (!isAuthenticated()) {
+            toast.info('Vui lòng đăng nhập để đăng ký lớp.')
+            navigate('/dang-nhap')
             return
         }
 
-        navigate(`/dang-ky-khoa-hoc/${id}`)
+        try {
+            setRegisteringLop(idLop)
+            const response = await registerClass(idLop)
+            const registrationId = response.idDangKy ?? (response as any).registrationId ?? (response as any).paymentId
+            toast.success('Đăng ký lớp học thành công! Vui lòng thanh toán học phí.')
+
+            if (registrationId) {
+                navigate(`/payment/${registrationId}`)
+                return
+            }
+
+            navigate('/lop-cua-toi')
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Lỗi khi đăng ký'
+            toast.error(msg)
+        } finally {
+            setRegisteringLop(null)
+        }
     }
 
     if (loading) {
@@ -199,8 +220,12 @@ export default function CourseDetail() {
                                 </div>
 
                                 {canRegister && (
-                                    <button className="class-register-btn" onClick={handleRegister}>
-                                        Đăng ký lớp
+                                    <button 
+                                        className="class-register-btn" 
+                                        onClick={() => handleRegister(lophoc.idLop)}
+                                        disabled={registeringLop === lophoc.idLop}
+                                    >
+                                        {registeringLop === lophoc.idLop ? 'Đang đăng ký...' : 'Đăng ký lớp'}
                                     </button>
                                 )}
                             </div>

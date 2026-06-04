@@ -193,6 +193,7 @@ export default function InstructorTimetable() {
                             >
                               <div className="ttb-event-title">
                                 {it.title ?? it.tenLop ?? (it.kind === "Exam" ? "Gác thi" : "Lịch dạy")}
+                                {it.loaiLop ? ` [${it.loaiLop}]` : ""}
                               </div>
                               <div className="ttb-event-meta">
                                 {new Date(it.start).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}-

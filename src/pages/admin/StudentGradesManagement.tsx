@@ -12,13 +12,13 @@ export default function StudentGradesManagement() {
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
     const [createForm, setCreateForm] = useState({
         idDangKy: '',
-        diemChuyenCan: '',
-        diemThi: '',
+        diemLyThuyet: '',
+        diemThucHanh: '',
     });
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({
-        diemChuyenCan: 0,
-        diemThi: 0,
+        diemLyThuyet: 0,
+        diemThucHanh: 0,
     });
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -77,8 +77,8 @@ export default function StudentGradesManagement() {
     const handleEdit = (result: KetQuaHocTapDetailDTO) => {
         setEditingId(result.idKetQua);
         setEditForm({
-            diemChuyenCan: result.diemChuyenCan || 0,
-            diemThi: result.diemThi || 0,
+            diemLyThuyet: result.diemLyThuyet || 0,
+            diemThucHanh: result.diemThucHanh || 0,
         });
         setShowEditModal(true);
     };
@@ -89,8 +89,8 @@ export default function StudentGradesManagement() {
 
         try {
             await ketQuaHocTapService.updateResult(editingId, {
-                diemChuyenCan: editForm.diemChuyenCan,
-                diemThi: editForm.diemThi,
+                diemLyThuyet: editForm.diemLyThuyet,
+                diemThucHanh: editForm.diemThucHanh,
             });
             alert('Cập nhật kết quả thành công');
             setShowEditModal(false);
@@ -109,29 +109,29 @@ export default function StudentGradesManagement() {
 
     const handleCreate = async () => {
         const idDangKy = Number(createForm.idDangKy);
-        const diemChuyenCan = createForm.diemChuyenCan === '' ? undefined : Number(createForm.diemChuyenCan);
-        const diemThi = createForm.diemThi === '' ? undefined : Number(createForm.diemThi);
+        const diemLyThuyet = createForm.diemLyThuyet === '' ? undefined : Number(createForm.diemLyThuyet);
+        const diemThucHanh = createForm.diemThucHanh === '' ? undefined : Number(createForm.diemThucHanh);
 
         if (!Number.isInteger(idDangKy) || idDangKy <= 0) {
             alert('Vui lòng nhập ID đăng ký hợp lệ');
             return;
         }
 
-        if (diemChuyenCan !== undefined && (Number.isNaN(diemChuyenCan) || diemChuyenCan < 0 || diemChuyenCan > 10)) {
-            alert('Điểm chuyên cần phải từ 0 đến 10');
+        if (diemLyThuyet !== undefined && (Number.isNaN(diemLyThuyet) || diemLyThuyet < 0 || diemLyThuyet > 10)) {
+            alert('Điểm lý thuyết phải từ 0 đến 10');
             return;
         }
 
-        if (diemThi !== undefined && (Number.isNaN(diemThi) || diemThi < 0 || diemThi > 10)) {
-            alert('Điểm thi phải từ 0 đến 10');
+        if (diemThucHanh !== undefined && (Number.isNaN(diemThucHanh) || diemThucHanh < 0 || diemThucHanh > 10)) {
+            alert('Điểm thực hành phải từ 0 đến 10');
             return;
         }
 
         try {
             const response = await ketQuaHocTapService.createResult({
                 idDangKy,
-                diemChuyenCan,
-                diemThi,
+                diemLyThuyet,
+                diemThucHanh,
             });
 
             const data = response.data as { certificateIssued?: boolean; idChungChi?: number };
@@ -143,8 +143,8 @@ export default function StudentGradesManagement() {
 
             setCreateForm({
                 idDangKy: '',
-                diemChuyenCan: '',
-                diemThi: '',
+                diemLyThuyet: '',
+                diemThucHanh: '',
             });
 
             if (selectedClass) {
@@ -194,25 +194,25 @@ export default function StudentGradesManagement() {
                         />
                     </div>
                     <div className="form-group">
-                        <label>Điểm chuyên cần</label>
+                        <label>Điểm lý thuyết</label>
                         <input
                             type="number"
                             min="0"
                             max="10"
                             step="0.5"
-                            value={createForm.diemChuyenCan}
-                            onChange={(e) => setCreateForm({ ...createForm, diemChuyenCan: e.target.value })}
+                            value={createForm.diemLyThuyet}
+                            onChange={(e) => setCreateForm({ ...createForm, diemLyThuyet: e.target.value })}
                         />
                     </div>
                     <div className="form-group">
-                        <label>Điểm thi</label>
+                        <label>Điểm thực hành</label>
                         <input
                             type="number"
                             min="0"
                             max="10"
                             step="0.5"
-                            value={createForm.diemThi}
-                            onChange={(e) => setCreateForm({ ...createForm, diemThi: e.target.value })}
+                            value={createForm.diemThucHanh}
+                            onChange={(e) => setCreateForm({ ...createForm, diemThucHanh: e.target.value })}
                         />
                     </div>
                 </div>
@@ -293,8 +293,8 @@ export default function StudentGradesManagement() {
                                     <th>Học viên</th>
                                     <th>Khóa học</th>
                                     <th>Lớp học</th>
-                                    <th>Điểm chuyên cần</th>
-                                    <th>Điểm thi</th>
+                                    <th>Điểm lý thuyết</th>
+                                    <th>Điểm thực hành</th>
                                     <th>Điểm TB</th>
                                     <th>Kết luận</th>
                                     <th>Hành động</th>
@@ -308,10 +308,10 @@ export default function StudentGradesManagement() {
                                         <td>{result.courseeName}</td>
                                         <td>{result.className}</td>
                                         <td className="text-center">
-                                            {result.diemChuyenCan?.toFixed(1) || '-'}
+                                            {result.diemLyThuyet?.toFixed(1) || '-'}
                                         </td>
                                         <td className="text-center">
-                                            {result.diemThi?.toFixed(1) || '-'}
+                                            {result.diemThucHanh?.toFixed(1) || '-'}
                                         </td>
                                         <td className="text-center font-bold">
                                             {result.diemTrungBinh?.toFixed(2) || '-'}
@@ -350,34 +350,34 @@ export default function StudentGradesManagement() {
                         <h3>Cập nhật kết quả học tập</h3>
 
                         <div className="form-group">
-                            <label>Điểm chuyên cần (0-10):</label>
+                            <label>Điểm lý thuyết (0-10):</label>
                             <input
                                 type="number"
                                 min="0"
                                 max="10"
                                 step="0.5"
-                                value={editForm.diemChuyenCan}
+                                value={editForm.diemLyThuyet}
                                 onChange={(e) =>
                                     setEditForm({
                                         ...editForm,
-                                        diemChuyenCan: parseFloat(e.target.value),
+                                        diemLyThuyet: parseFloat(e.target.value),
                                     })
                                 }
                             />
                         </div>
 
                         <div className="form-group">
-                            <label>Điểm thi (0-10):</label>
+                            <label>Điểm thực hành (0-10):</label>
                             <input
                                 type="number"
                                 min="0"
                                 max="10"
                                 step="0.5"
-                                value={editForm.diemThi}
+                                value={editForm.diemThucHanh}
                                 onChange={(e) =>
                                     setEditForm({
                                         ...editForm,
-                                        diemThi: parseFloat(e.target.value),
+                                        diemThucHanh: parseFloat(e.target.value),
                                     })
                                 }
                             />
