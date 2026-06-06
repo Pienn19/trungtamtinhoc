@@ -11,16 +11,14 @@ interface KhoaHoc {
     hocPhi: number
     moTa: string
     anhDaiDien: string
-    trangThai: string
 }
 
 const emptyForm = {
     tenKhoaHoc: '',
-    thoiLuong: 0,
-    hocPhi: 0,
+    thoiLuong: '' as number | '',
+    hocPhi: '' as number | '',
     moTa: '',
     anhDaiDien: '',
-    trangThai: 'Active',
 }
 
 const AdminCourseManagement = () => {
@@ -38,22 +36,12 @@ const AdminCourseManagement = () => {
         void fetchCourses()
     }, [])
 
-    const isAllowedCertificateCourse = (course: KhoaHoc) => {
-        const normalizedName = course.tenKhoaHoc.toLowerCase()
-        return course.thoiLuong === 60
-            || course.thoiLuong === 90
-            || normalizedName.includes('basic')
-            || normalizedName.includes('advanced')
-            || normalizedName.includes('cơ bản')
-            || normalizedName.includes('nâng cao')
-    }
-
     const fetchCourses = async () => {
         try {
             setLoading(true)
             const response = await axiosClient.get('/khoahoc')
             const data = Array.isArray(response.data) ? response.data : []
-            setCourses(data.filter(isAllowedCertificateCourse))
+            setCourses(data)
         } catch (error) {
             console.error('Error:', error)
         } finally {
@@ -120,6 +108,28 @@ const AdminCourseManagement = () => {
         setSubmitting(true)
         setFormError('')
 
+        // Explicit validation
+        if (!formData.tenKhoaHoc.trim()) {
+            setFormError('Vui lòng nhập tên khóa học.')
+            setSubmitting(false)
+            return
+        }
+        if (!formData.thoiLuong || Number(formData.thoiLuong) <= 0) {
+            setFormError('Vui lòng nhập thời lượng hợp lệ (lớn hơn 0).')
+            setSubmitting(false)
+            return
+        }
+        if (!formData.hocPhi || Number(formData.hocPhi) <= 0) {
+            setFormError('Vui lòng nhập học phí hợp lệ (lớn hơn 0).')
+            setSubmitting(false)
+            return
+        }
+        if (!formData.moTa.trim()) {
+            setFormError('Vui lòng nhập mô tả khóa học.')
+            setSubmitting(false)
+            return
+        }
+
         try {
             const url = editingId ? `/khoahoc/${editingId}` : '/khoahoc'
 
@@ -147,7 +157,6 @@ const AdminCourseManagement = () => {
             hocPhi: course.hocPhi,
             moTa: course.moTa,
             anhDaiDien: course.anhDaiDien,
-            trangThai: course.trangThai,
         })
         setImagePreview(getCourseImageSrc(course.anhDaiDien))
         setEditingId(course.idKhoaHoc)
@@ -175,6 +184,7 @@ const AdminCourseManagement = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="admin-course-management__form-grid">
                             <div className="admin-course-management__field">
+                                <label className="admin-course-management__label">Tên khóa học</label>
                                 <input
                                     type="text"
                                     placeholder="Tên khóa học"
@@ -185,38 +195,33 @@ const AdminCourseManagement = () => {
                                 />
                             </div>
                             <div className="admin-course-management__field">
+                                <label className="admin-course-management__label">Thời lượng (tiết)</label>
                                 <input
                                     type="number"
-                                    placeholder="Thời lượng (giờ)"
+                                    placeholder="Thời lượng (VD: 45 tiết)"
                                     value={formData.thoiLuong}
-                                    onChange={(event) => setFormData({ ...formData, thoiLuong: Number(event.target.value) })}
+                                    onChange={(event) => setFormData({ ...formData, thoiLuong: event.target.value === '' ? '' : Number(event.target.value) })}
                                     required
+                                    min="1"
                                     className="admin-course-management__input"
                                 />
                             </div>
                             <div className="admin-course-management__field">
+                                <label className="admin-course-management__label">Học phí (VND)</label>
                                 <input
                                     type="number"
                                     placeholder="Học phí (VND)"
                                     value={formData.hocPhi}
-                                    onChange={(event) => setFormData({ ...formData, hocPhi: Number(event.target.value) })}
+                                    onChange={(event) => setFormData({ ...formData, hocPhi: event.target.value === '' ? '' : Number(event.target.value) })}
                                     required
+                                    min="1"
                                     className="admin-course-management__input"
                                 />
-                            </div>
-                            <div className="admin-course-management__field">
-                                <select
-                                    value={formData.trangThai}
-                                    onChange={(event) => setFormData({ ...formData, trangThai: event.target.value })}
-                                    className="admin-course-management__select"
-                                >
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
                             </div>
                         </div>
 
                         <div className="admin-course-management__field admin-course-management__field--full">
+                            <label className="admin-course-management__label">Mô tả khóa học</label>
                             <textarea
                                 placeholder="Mô tả khóa học"
                                 value={formData.moTa}
@@ -318,7 +323,6 @@ const AdminCourseManagement = () => {
                                 <th className="admin-course-management__table-header">Tên Khóa Học</th>
                                 <th className="admin-course-management__table-header">Thời Lượng</th>
                                 <th className="admin-course-management__table-header">Học Phí</th>
-                                <th className="admin-course-management__table-header">Trạng Thái</th>
                                 <th className="admin-course-management__table-header admin-course-management__table-actions">Hành Động</th>
                             </tr>
                         </thead>
@@ -327,18 +331,8 @@ const AdminCourseManagement = () => {
                                 <tr key={course.idKhoaHoc} className="admin-course-management__table-row">
                                     <td className="admin-course-management__table-cell">{course.idKhoaHoc}</td>
                                     <td className="admin-course-management__table-cell">{course.tenKhoaHoc}</td>
-                                    <td className="admin-course-management__table-cell">{course.thoiLuong} giờ</td>
+                                    <td className="admin-course-management__table-cell">{course.thoiLuong} tiết</td>
                                     <td className="admin-course-management__table-cell">{course.hocPhi.toLocaleString()} VND</td>
-                                    <td className="admin-course-management__table-cell">
-                                        <span
-                                            className={`admin-course-management__status ${course.trangThai === 'Active'
-                                                ? 'admin-course-management__status--active'
-                                                : 'admin-course-management__status--inactive'
-                                                }`}
-                                        >
-                                            {course.trangThai}
-                                        </span>
-                                    </td>
                                     <td className="admin-course-management__table-cell admin-course-management__table-actions">
                                         <div className="admin-course-management__row-actions">
                                             <button

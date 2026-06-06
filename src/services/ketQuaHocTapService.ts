@@ -27,12 +27,12 @@ export const ketQuaHocTapService = {
     },
 
     // Create new result
-    createResult: async (data: { idDangKy: number; diemChuyenCan?: number; diemThi?: number }) => {
+    createResult: async (data: { idDangKy: number; diemLyThuyet?: number; diemThucHanh?: number }) => {
         return await axiosClient.post('/ketquahoctap', data);
     },
 
     // Update result
-    updateResult: async (id: number, data: { diemChuyenCan?: number; diemThi?: number }) => {
+    updateResult: async (id: number, data: { diemLyThuyet?: number; diemThucHanh?: number }) => {
         return await axiosClient.put(`/ketquahoctap/${id}`, data);
     },
 

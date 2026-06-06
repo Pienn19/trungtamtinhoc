@@ -16,6 +16,15 @@ export const login = async (data: LoginDTO) => {
   }
 };
 
+export const forgotPassword = async (usernameOrEmail: string) => {
+  try {
+    const res = await axiosClient.post("/auth/forgot-password", { usernameOrEmail });
+    return res.data;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
 export const register = async (data: RegisterDTO) => {
   const res = await axiosClient.post("/Auth/register", data)
   return res.data

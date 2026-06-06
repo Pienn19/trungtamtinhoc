@@ -51,6 +51,11 @@ export interface LopHocDTO {
     ngayHocTrongTuan?: string
     gioBatDau?: string
     gioKetThuc?: string
+    soTietMotBuoi?: number
+    thuTrongTuan?: string
+    caHoc?: string
+    phongHoc?: string
+    hinhThucHoc?: string
 }
 
 export interface DangKyDTO {

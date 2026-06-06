@@ -1,8 +1,8 @@
 export type KetQuaHocTapDTO = {
     idKetQua: number;
     idDangKy: number;
-    diemChuyenCan: number | null;
-    diemThi: number | null;
+    diemLyThuyet: number | null;
+    diemThucHanh: number | null;
     ketLuan: string;
     ngayCapNhat: string;
 };
@@ -13,8 +13,8 @@ export type KetQuaHocTapDetailDTO = {
     hocVienName: string;
     courseeName: string;
     className: string;
-    diemChuyenCan: number | null;
-    diemThi: number | null;
+    diemLyThuyet: number | null;
+    diemThucHanh: number | null;
     diemTrungBinh: number | null;
     ketLuan: string;
     trangThaiHoc: string;
@@ -48,8 +48,8 @@ export type ClassStudentResultDTO = {
     idLop: number;
     tenLop?: string | null;
     idKetQua?: number | null;
-    diemChuyenCan?: number | null;
-    diemThi?: number | null;
+    diemLyThuyet?: number | null;
+    diemThucHanh?: number | null;
     diemTrungBinh?: number | null;
     ketLuan?: string | null;
 };

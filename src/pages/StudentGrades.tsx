@@ -7,8 +7,8 @@ interface LearningResult {
     tenLop: string
     ngayBatDau: string | null
     ngayKetThuc: string | null
-    diemChuyenCan: number | null
-    diemThi: number | null
+    diemLyThuyet: number | null
+    diemThucHanh: number | null
     diemTrungBinh: number | null
     ketLuan: string | null
     trangThaiDangKy: string
@@ -76,8 +76,8 @@ export default function StudentGrades() {
                                         <th>Lớp Học</th>
                                         <th>Ngày Bắt Đầu</th>
                                         <th>Ngày Kết Thúc</th>
-                                        <th style={{ textAlign: 'center' }}>Điểm Chuyên Cần</th>
-                                        <th style={{ textAlign: 'center' }}>Điểm Thi</th>
+                                        <th style={{ textAlign: 'center' }}>Điểm lý thuyết</th>
+                                        <th style={{ textAlign: 'center' }}>Điểm thực hành</th>
                                         <th style={{ textAlign: 'center' }}>Điểm Trung Bình</th>
                                         <th>Kết Luận</th>
                                     </tr>
@@ -93,10 +93,10 @@ export default function StudentGrades() {
                                             <td>{formatDate(result.ngayBatDau)}</td>
                                             <td>{formatDate(result.ngayKetThuc)}</td>
                                             <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                                                {result.diemChuyenCan !== null ? result.diemChuyenCan.toFixed(1) : '-'}
+                                                {result.diemLyThuyet !== null ? result.diemLyThuyet.toFixed(1) : '-'}
                                             </td>
                                             <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                                                {result.diemThi !== null ? result.diemThi.toFixed(1) : '-'}
+                                                {result.diemThucHanh !== null ? result.diemThucHanh.toFixed(1) : '-'}
                                             </td>
                                             <td style={{
                                                 textAlign: 'center',
