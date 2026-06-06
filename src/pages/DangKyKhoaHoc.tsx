@@ -20,6 +20,7 @@ export default function DangKyKhoaHoc() {
   const [error, setError] = useState<string | null>(null)
   const [checkingConflict, setCheckingConflict] = useState(false)
   const [shouldCheckConflict, setShouldCheckConflict] = useState(false)
+  const [hideConflicts, setHideConflicts] = useState(true)
   const [conflictData, setConflictData] = useState<{ hasConflict: boolean; conflictingClasses: Array<{ idLop: number; tenLop: string; ngayBatDau?: string; ngayKetThuc?: string }> } | null>(null)
 
   const selectedClass: LopHocDTO | null = course?.lopHocs.find((lop) => lop.idLop === selectedLop) ?? null
@@ -134,7 +135,7 @@ export default function DangKyKhoaHoc() {
     setSelectedCourseId(Number.isNaN(courseId) ? null : courseId)
   }
 
-  const openClasses = course?.lopHocs.filter((lop) => lop.allowDangKy && lop.soChoConLai > 0).length ?? 0
+  const openClasses = course?.lopHocs.filter((lop) => lop.allowDangKy && lop.soChoConLai > 0 && (!hideConflicts || !lop.isConflict)).length ?? 0
 
   if (loadingCourses) {
     return <div className="page-shell"><div className="course-status">Đang tải danh sách khóa học...</div></div>
@@ -235,42 +236,60 @@ export default function DangKyKhoaHoc() {
 
               <div className="registration-classes">
                 <div className="registration-section-head">
-                  <h3>Bước 2. Chọn lớp</h3>
-                  <p>Chỉ lớp còn chỗ và đang mở đăng ký mới có thể chọn.</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3>Bước 2. Chọn lớp</h3>
+                      <p>Chỉ lớp còn chỗ và đang mở đăng ký mới có thể chọn.</p>
+                    </div>
+                    {isAuthenticated() && (
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                        <input type="checkbox" checked={hideConflicts} onChange={e => setHideConflicts(e.target.checked)} />
+                        Ẩn các lớp bị trùng lịch
+                      </label>
+                    )}
+                  </div>
                 </div>
 
                 {course.lopHocs.length === 0 ? (
                   <div className="registration-empty">Khóa này chưa có lớp nào.</div>
                 ) : (
                   <div className="registration-class-grid">
-                    {course.lopHocs.map((lop) => {
-                      const isDisabled = !lop.allowDangKy || lop.soChoConLai <= 0
-                      const isSelected = selectedLop === lop.idLop
+                    {course.lopHocs
+                      .filter((lop) => !hideConflicts || !lop.isConflict)
+                      .map((lop) => {
+                        const isDisabled = !lop.allowDangKy || lop.soChoConLai <= 0 || lop.isConflict
+                        const isSelected = selectedLop === lop.idLop
 
-                      return (
-                        <button
-                          key={lop.idLop}
-                          type="button"
-                          onClick={() => {
-                            if (isDisabled) return
-                            setSelectedLop(lop.idLop)
-                          }}
-                          disabled={isDisabled}
-                          className={`registration-class-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-                        >
-                          <div className="registration-class-head">
-                            <strong>{lop.tenLop}</strong>
-                            <span className={`registration-class-pill ${!lop.allowDangKy ? 'locked' : lop.soChoConLai <= 0 ? 'full' : 'open'}`}>
-                              {!lop.allowDangKy ? 'Đang khóa' : lop.soChoConLai <= 0 ? 'Đã đầy' : `Còn ${lop.soChoConLai} chỗ`}
-                            </span>
-                          </div>
-                          <div className="registration-class-meta">
-                            <span>📅 {lop.ngayBatDau ? formatDate(lop.ngayBatDau) : 'Chưa có'} - {lop.ngayKetThuc ? formatDate(lop.ngayKetThuc) : 'Chưa có'}</span>
-                            <span>👥 {lop.soHocVienDangKy}/{lop.siSoToiDa} học viên</span>
-                          </div>
-                        </button>
-                      )
-                    })}
+                        return (
+                          <button
+                            key={lop.idLop}
+                            type="button"
+                            onClick={() => {
+                              if (isDisabled) return
+                              setSelectedLop(lop.idLop)
+                            }}
+                            disabled={isDisabled}
+                            className={`registration-class-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
+                            style={lop.isConflict ? { opacity: 0.6, borderColor: '#f87171' } : {}}
+                          >
+                            <div className="registration-class-head">
+                              <strong>{lop.tenLop}</strong>
+                              <span className={`registration-class-pill ${!lop.allowDangKy ? 'locked' : lop.soChoConLai <= 0 ? 'full' : lop.isConflict ? 'locked' : 'open'}`}>
+                                {lop.isConflict ? 'Trùng lịch' : !lop.allowDangKy ? 'Đang khóa' : lop.soChoConLai <= 0 ? 'Đã đầy' : `Còn ${lop.soChoConLai} chỗ`}
+                              </span>
+                            </div>
+                            <div className="registration-class-meta">
+                              <span>📅 {lop.ngayBatDau ? formatDate(lop.ngayBatDau) : 'Chưa có'} - {lop.ngayKetThuc ? formatDate(lop.ngayKetThuc) : 'Chưa có'}</span>
+                              <span>👥 {lop.soHocVienDangKy}/{lop.siSoToiDa} học viên</span>
+                            </div>
+                            {lop.isConflict && (
+                              <div style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '6px', textAlign: 'left' }}>
+                                ⚠️ {lop.conflictMessage}
+                              </div>
+                            )}
+                          </button>
+                        )
+                      })}
                   </div>
                 )}
               </div>

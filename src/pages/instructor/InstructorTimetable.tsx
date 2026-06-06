@@ -41,7 +41,10 @@ function fmtVN(d: Date) {
 }
 
 function dateKey(d: Date) {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 export default function InstructorTimetable() {
@@ -190,6 +193,7 @@ export default function InstructorTimetable() {
                             >
                               <div className="ttb-event-title">
                                 {it.title ?? it.tenLop ?? (it.kind === "Exam" ? "Gác thi" : "Lịch dạy")}
+                                {it.loaiLop ? ` [${it.loaiLop}]` : ""}
                               </div>
                               <div className="ttb-event-meta">
                                 {new Date(it.start).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}-

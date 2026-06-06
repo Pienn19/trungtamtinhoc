@@ -576,18 +576,7 @@ export default function AdminClassManagement() {
                     >
                         Ghép nhiều lớp
                     </button>
-                    <button
-                        onClick={() => { setShowHistoryModal(true); void axiosClient.get('/lophoc/merge/history').then(r => setHistoryItems(r.data)).catch(() => setHistoryItems([])) }}
-                        className="admin-class-management__btn admin-class-management__btn--history"
-                    >
-                        Lịch sử ghép
-                    </button>
-                    <button
-                        onClick={() => { setShowSuggestionsModal(true); void axiosClient.get('/lophoc/merge/suggestions').then(r => setSuggestions(r.data)).catch(() => setSuggestions([])) }}
-                        className="admin-class-management__btn admin-class-management__btn--suggestions"
-                    >
-                        Gợi ý ghép
-                    </button>
+
                 </div>
             </div>
 

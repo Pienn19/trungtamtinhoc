@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyWeekSchedule, type ScheduleItem } from "../services/scheduleService";
+import { getMyWeekSchedule, getUpcomingScheduleDate, type ScheduleItem } from "../services/scheduleService";
 import "../styles/WeeklyTimetable.css";
 
 type Filter = "all" | "study" | "exam";
@@ -42,7 +42,10 @@ function fmtVN(d: Date) {
 }
 
 function dateKey(d: Date) {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 export default function WeeklyTimetable() {
@@ -52,6 +55,13 @@ export default function WeeklyTimetable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<ScheduleItem[]>([]);
+  const [upcomingDate, setUpcomingDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    getUpcomingScheduleDate()
+      .then(date => setUpcomingDate(date))
+      .catch(console.error);
+  }, []);
 
   const weekStart = useMemo(() => startOfWeekMonday(selectedDate), [selectedDate]);
   const weekDays = useMemo(() => days.map((_, i) => addDays(weekStart, i)), [weekStart]);
@@ -180,7 +190,16 @@ export default function WeeklyTimetable() {
           <>
             {items.length === 0 && (
               <div className="ttb-state">
-                Tuần này chưa có lịch học/lịch thi.
+                <p>Tuần này chưa có lịch học/lịch thi.</p>
+                {upcomingDate && new Date(upcomingDate) > weekDays[6] && (
+                  <button 
+                    className="ttb-btn" 
+                    style={{ marginTop: '1rem', background: 'var(--primary-color)', color: '#fff' }}
+                    onClick={() => setSelectedDate(new Date(upcomingDate))}
+                  >
+                    Chuyển đến tuần bắt đầu từ {new Date(upcomingDate).toLocaleDateString("vi-VN")}
+                  </button>
+                )}
               </div>
             )}
 
@@ -215,6 +234,7 @@ export default function WeeklyTimetable() {
                               >
                                 <div className="ttb-event-title">
                                   {it.title ?? it.tenLop ?? (it.kind === "Exam" ? "Lịch thi" : "Lịch học")}
+                                  {it.loaiLop ? ` [${it.loaiLop}]` : ""}
                                 </div>
                                 <div className="ttb-event-meta">
                                   {new Date(it.start).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}-

@@ -16,7 +16,7 @@ export async function getMyGrades() {
 }
 
 export async function getMyLearningResults() {
-    const res = await axiosClient.get('/ketquahoctap/my');
+    const res = await axiosClient.get('/ketquahoctap/my-results');
     return res.data;
 }
 

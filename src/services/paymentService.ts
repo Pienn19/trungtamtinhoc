@@ -84,6 +84,26 @@ export const getReceipt = async (receiptId: number): Promise<BienLaiDTO> => {
     return response.json()
 }
 
+// Get receipt by registration id
+export const getReceiptByRegistrationId = async (registrationId: number): Promise<BienLaiDTO> => {
+    const token = getAuthToken()
+    if (!token) {
+        throw new Error('Bạn cần đăng nhập')
+    }
+
+    const response = await fetch(`${API_URL}/thanhtoan/dangky/${registrationId}/bienlai`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+
+    if (!response.ok) {
+        throw new Error('Không tìm thấy biên lai')
+    }
+
+    return response.json()
+}
+
 // Format payment status
 export const getPaymentStatusLabel = (status: string): string => {
     const statusMap: { [key: string]: string } = {

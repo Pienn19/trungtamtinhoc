@@ -13,6 +13,7 @@ export type ScheduleItem = {
   note?: string | null;
   status?: string | null;
   tenGiangVien?: string | null;
+  loaiLop?: string | null;
 };
 
 export type ScheduleWeekResponse = {
@@ -25,6 +26,11 @@ export async function getMyWeekSchedule(date: Date, type: "all" | "study" | "exa
   const iso = date.toISOString().slice(0, 10);
   const res = await axiosClient.get<ScheduleWeekResponse>(`/schedule/my-week?date=${iso}&type=${type}`);
   return res.data;
+}
+
+export async function getUpcomingScheduleDate(): Promise<string | null> {
+  const res = await axiosClient.get<{ upcomingDate: string | null }>(`/schedule/upcoming-date`);
+  return res.data.upcomingDate;
 }
 
 export async function getClassSchedules(idLop: number) {
