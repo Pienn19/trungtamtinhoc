@@ -28,8 +28,7 @@ export const ketQuaHocTapService = {
 
     // Create new result
     createResult: async (data: { idDangKy: number; diemLyThuyet?: number; diemThucHanh?: number }) => {
-        const res = await axiosClient.post<KetQuaHocTapDTO>('/ketquahoctap', data)
-        return res.data
+        return await axiosClient.post('/ketquahoctap', data);
     },
 
     // Update result

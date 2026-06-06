@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import axiosClient from '../../services/axiosClient'
 import { FiEdit2, FiTrash2, FiPlus, FiRefreshCw, FiUsers } from 'react-icons/fi'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 import '../../styles/admin-class-management.css'
 
 type KhoaHocOption = {
@@ -30,6 +32,10 @@ type LopHoc = {
     allowDangKy: boolean
     hocViensRegistered?: HocVienDangKy[] | null
     trangThai: string | null
+    thuTrongTuan?: string | null
+    caHoc?: string | null
+    phongHoc?: string | null
+    hinhThucHoc?: string | null
 }
 
 type LopHocDetail = LopHoc & {
@@ -56,6 +62,10 @@ const defaultForm = {
     ngayKetThuc: '',
     trangThai: 'Planning',
     ghiChu: '',
+    thuTrongTuan: '',
+    caHoc: '',
+    phongHoc: '',
+    hinhThucHoc: 'Offline',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -64,14 +74,22 @@ const STATUS_LABELS: Record<string, string> = {
     Closed: 'Đã kết thúc',
 }
 
-const calculateEndDateFromDuration = (startDate: string, thoiLuong: number) => {
-    if (!startDate || !thoiLuong || thoiLuong <= 0) return ''
+const calculateEndDateFromDuration = (
+    startDate: string, 
+    thoiLuong: number, 
+    soTietMotBuoi: number, 
+    thuTrongTuan: string
+) => {
+    if (!startDate || !thoiLuong || thoiLuong <= 0 || !soTietMotBuoi || soTietMotBuoi <= 0) return ''
+
+    const selectedDays = thuTrongTuan ? thuTrongTuan.split(',').filter(Boolean).length : 0
+    if (selectedDays === 0) return ''
 
     const start = new Date(`${startDate}T00:00:00`)
     if (Number.isNaN(start.getTime())) return ''
 
-    const sessions = thoiLuong / 5
-    const weeks = sessions / 3
+    const sessions = Math.ceil(thoiLuong / soTietMotBuoi)
+    const weeks = sessions / selectedDays
     const days = Math.ceil(weeks * 7)
 
     const end = new Date(start)
@@ -86,6 +104,7 @@ const calculateEndDateFromDuration = (startDate: string, thoiLuong: number) => {
 export default function AdminClassManagement() {
     const [classes, setClasses] = useState<LopHoc[]>([])
     const [courses, setCourses] = useState<KhoaHocOption[]>([])
+    const [rooms, setRooms] = useState<any[]>([])
     const [selectedClassId, setSelectedClassId] = useState<number | null>(null)
     const [selectedClassDetail, setSelectedClassDetail] = useState<LopHocDetail | null>(null)
     const [loading, setLoading] = useState(true)
@@ -134,6 +153,88 @@ export default function AdminClassManagement() {
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [showMergeModal, showMultiMergeModal, showSuggestionsModal, showHistoryModal])
 
+    const exportRosterToPDF = async () => {
+        if (!selectedClassDetail?.hocViensRegistered || selectedClassDetail.hocViensRegistered.length === 0) {
+            alert('Lớp này chưa có học viên nào để xuất.');
+            return;
+        }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.top = '0';
+        tempDiv.style.width = '800px';
+        tempDiv.style.background = '#ffffff';
+        tempDiv.style.padding = '40px';
+        tempDiv.style.fontFamily = 'Arial, sans-serif';
+        tempDiv.style.color = '#000000';
+
+        let tableHTML = `
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #1e3a8a; margin: 0; font-size: 24px; text-transform: uppercase;">Danh Sách Học Viên</h1>
+                <h2 style="color: #475569; margin: 10px 0 0 0; font-size: 18px; font-weight: normal;">Lớp: <strong>${selectedClassDetail.tenLop}</strong></h2>
+                <p style="color: #64748b; margin: 5px 0 0 0; font-size: 14px;">Khóa học: ${selectedCourseName || selectedClassDetail.tenKhoaHoc || 'Đang cập nhật'}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9; color: #1e293b;">
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center; width: 50px;">STT</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left;">Họ Tên</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left;">Email</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left;">Điện Thoại</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center;">Ngày Đăng Ký</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        selectedClassDetail.hocViensRegistered.forEach((student, index) => {
+            tableHTML += `
+                <tr>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center;">${index + 1}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px;"><strong>${student.hoTen || ''}</strong></td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px;">${student.email || ''}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px;">${student.dienThoai || ''}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center;">${student.ngayDangKy ? new Date(student.ngayDangKy).toLocaleDateString('vi-VN') : ''}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+            </table>
+            <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 14px;">
+                <div>
+                    <p style="margin: 0;"><strong>Tổng số học viên:</strong> ${selectedClassDetail.hocViensRegistered.length}</p>
+                </div>
+                <div style="text-align: center; margin-right: 40px;">
+                    <p style="margin: 0 0 60px 0;">Ngày ..... tháng ..... năm .......</p>
+                    <p style="margin: 0; font-weight: bold;">Người lập bảng</p>
+                </div>
+            </div>
+        `;
+
+        tempDiv.innerHTML = tableHTML;
+        document.body.appendChild(tempDiv);
+
+        try {
+            const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`DanhSachHocVien_${selectedClassDetail.tenLop.replace(/\s+/g, '_')}.pdf`);
+        } catch (err) {
+            console.error('Lỗi xuất PDF:', err);
+            alert('Không thể xuất PDF. Vui lòng thử lại sau.');
+        } finally {
+            document.body.removeChild(tempDiv);
+        }
+    };
+
     const selectedCourseName = useMemo(() => {
         if (!selectedClassDetail?.idKhoaHoc) return ''
         return courses.find((course) => course.idKhoaHoc === selectedClassDetail.idKhoaHoc)?.tenKhoaHoc ?? ''
@@ -150,14 +251,22 @@ export default function AdminClassManagement() {
             return
         }
 
-        const calculatedEndDate = calculateEndDateFromDuration(formData.ngayBatDau, selectedCourseDuration)
-        if (!calculatedEndDate) return
+        const calculatedEndDate = calculateEndDateFromDuration(
+            formData.ngayBatDau, 
+            selectedCourseDuration, 
+            formData.soTietMotBuoi, 
+            formData.thuTrongTuan
+        )
+        if (!calculatedEndDate) {
+            setFormData((prev) => (prev.ngayKetThuc ? { ...prev, ngayKetThuc: '' } : prev))
+            return
+        }
 
         setFormData((prev) => {
             if (prev.ngayKetThuc === calculatedEndDate) return prev
             return { ...prev, ngayKetThuc: calculatedEndDate }
         })
-    }, [formData.ngayBatDau, selectedCourseDuration])
+    }, [formData.ngayBatDau, selectedCourseDuration, formData.soTietMotBuoi, formData.thuTrongTuan])
 
     const mergeTargetOptions = useMemo(() => {
         if (!mergeSourceClass?.idKhoaHoc) return []
@@ -204,13 +313,15 @@ export default function AdminClassManagement() {
     const fetchData = async () => {
         try {
             setLoading(true)
-            const [classesRes, coursesRes] = await Promise.all([
+            const [classesRes, coursesRes, roomsRes] = await Promise.all([
                 axiosClient.get('/lophoc'),
                 axiosClient.get('/khoahoc'),
+                axiosClient.get('/phongthi'),
             ])
 
             setClasses(Array.isArray(classesRes.data) ? classesRes.data : [])
             setCourses(Array.isArray(coursesRes.data) ? coursesRes.data : [])
+            setRooms(Array.isArray(roomsRes.data) ? roomsRes.data : [])
 
             const firstClass = Array.isArray(classesRes.data) && classesRes.data.length > 0 ? classesRes.data[0] : null
             if (firstClass) {
@@ -263,6 +374,10 @@ export default function AdminClassManagement() {
             ngayKetThuc: lop.ngayKetThuc ? lop.ngayKetThuc.slice(0, 10) : '',
             trangThai: lop.trangThai ?? 'Planning',
             ghiChu: lop.ghiChu ?? '',
+            thuTrongTuan: lop.thuTrongTuan ?? '',
+            caHoc: lop.caHoc ?? '',
+            phongHoc: lop.phongHoc ?? '',
+            hinhThucHoc: lop.hinhThucHoc ?? 'Offline',
         })
         setShowForm(true)
     }
@@ -311,11 +426,15 @@ export default function AdminClassManagement() {
                 tenLop: formData.tenLop,
                 idKhoaHoc: formData.idKhoaHoc,
                 siSoToiDa: formData.siSoToiDa,
-                soTietMotBuoi: 5,
+                soTietMotBuoi: formData.soTietMotBuoi || 3,
                 allowDangKy: formData.allowDangKy,
                 ngayBatDau: formData.ngayBatDau ? `${formData.ngayBatDau}T00:00:00` : null,
                 ngayKetThuc: formData.ngayKetThuc ? `${formData.ngayKetThuc}T00:00:00` : null,
                 ghiChu: formData.ghiChu || null,
+                thuTrongTuan: formData.thuTrongTuan || null,
+                caHoc: formData.caHoc || null,
+                phongHoc: formData.phongHoc || null,
+                hinhThucHoc: formData.hinhThucHoc || null,
             }
 
             if (editingId) {
@@ -502,43 +621,121 @@ export default function AdminClassManagement() {
                                 <div className="admin-class-management__form-label">Số tiết mỗi buổi</div>
                                 <input
                                     type="number"
-                                    min={3}
-                                    max={5}
+                                    min={1}
                                     placeholder="VD: 3"
                                     value={formData.soTietMotBuoi}
-                                    disabled
+                                    onChange={(e) => setFormData({ ...formData, soTietMotBuoi: Number(e.target.value) })}
                                     className="admin-class-management__form-input"
                                 />
                             </div>
-                            <select
-                                value={formData.trangThai}
-                                onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
-                                className="admin-class-management__form-select"
-                            >
-                                <option value="Planning">Lên kế hoạch</option>
-                                <option value="OnGoing">Đang diễn ra</option>
-                                <option value="Closed">Đã kết thúc</option>
-                            </select>
-                            <select
-                                value={formData.allowDangKy ? 'true' : 'false'}
-                                onChange={(e) => setFormData({ ...formData, allowDangKy: e.target.value === 'true' })}
-                                className="admin-class-management__form-select"
-                            >
-                                <option value="true">Cho phép đăng ký</option>
-                                <option value="false">Khóa đăng ký</option>
-                            </select>
-                            <input
-                                type="date"
-                                value={formData.ngayBatDau}
-                                onChange={(e) => setFormData({ ...formData, ngayBatDau: e.target.value })}
-                                className="admin-class-management__form-input"
-                            />
-                            <input
-                                type="date"
-                                value={formData.ngayKetThuc}
-                                disabled
-                                className="admin-class-management__form-input"
-                            />
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <div className="admin-class-management__form-label">Thứ học trong tuần</div>
+                                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
+                                    {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => {
+                                        const isChecked = formData.thuTrongTuan?.includes(day)
+                                        return (
+                                            <label key={day} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#f8fafc', padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={isChecked} 
+                                                    onChange={() => {
+                                                        let currentDays = formData.thuTrongTuan ? formData.thuTrongTuan.split(',').map(d => d.trim()).filter(Boolean) : []
+                                                        if (currentDays.includes(day)) {
+                                                            currentDays = currentDays.filter(d => d !== day)
+                                                        } else {
+                                                            currentDays.push(day)
+                                                            const order = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+                                                            currentDays.sort((a, b) => order.indexOf(a) - order.indexOf(b))
+                                                        }
+                                                        setFormData({ ...formData, thuTrongTuan: currentDays.join(', ') })
+                                                    }} 
+                                                />
+                                                <span style={{ fontSize: 14 }}>{day}</span>
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Ca học (thời gian)</div>
+                                <select
+                                    value={formData.caHoc}
+                                    onChange={(e) => setFormData({ ...formData, caHoc: e.target.value })}
+                                    className="admin-class-management__form-select"
+                                >
+                                    <option value="">-- Chọn ca học --</option>
+                                    <option value="Sáng (07:30 - 11:30)">Sáng (07:30 - 11:30)</option>
+                                    <option value="Chiều (13:30 - 17:30)">Chiều (13:30 - 17:30)</option>
+                                    <option value="Tối (18:00 - 21:00)">Tối (18:00 - 21:00)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Phòng học</div>
+                                <select
+                                    value={formData.phongHoc}
+                                    onChange={(e) => setFormData({ ...formData, phongHoc: e.target.value })}
+                                    className="admin-class-management__form-select"
+                                >
+                                    <option value="">-- Chọn phòng học --</option>
+                                    {rooms.map((r) => (
+                                        <option key={r.idPhong} value={r.tenPhong}>{r.tenPhong} (Sức chứa: {r.soLuong})</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Hình thức học</div>
+                                <select
+                                    value={formData.hinhThucHoc}
+                                    onChange={(e) => setFormData({ ...formData, hinhThucHoc: e.target.value })}
+                                    className="admin-class-management__form-select"
+                                >
+                                    <option value="Offline">Offline (Tại trung tâm)</option>
+                                    <option value="Online">Online (Qua mạng)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Trạng thái</div>
+                                <select
+                                    value={formData.trangThai}
+                                    onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
+                                    className="admin-class-management__form-select"
+                                >
+                                    <option value="Planning">Lên kế hoạch</option>
+                                    <option value="OnGoing">Đang diễn ra</option>
+                                    <option value="Closed">Đã kết thúc</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Cho phép đăng ký</div>
+                                <select
+                                    value={formData.allowDangKy ? 'true' : 'false'}
+                                    onChange={(e) => setFormData({ ...formData, allowDangKy: e.target.value === 'true' })}
+                                    className="admin-class-management__form-select"
+                                >
+                                    <option value="true">Cho phép đăng ký</option>
+                                    <option value="false">Khóa đăng ký</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Ngày bắt đầu</div>
+                                <input
+                                    type="date"
+                                    min={new Date().toLocaleDateString('en-CA')}
+                                    value={formData.ngayBatDau}
+                                    onChange={(e) => setFormData({ ...formData, ngayBatDau: e.target.value })}
+                                    className="admin-class-management__form-input"
+                                />
+                            </div>
+                            <div>
+                                <div className="admin-class-management__form-label">Ngày kết thúc (Dự kiến)</div>
+                                <input
+                                    type="date"
+                                    value={formData.ngayKetThuc}
+                                    disabled
+                                    className="admin-class-management__form-input"
+                                    style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
+                                />
+                            </div>
                         </div>
                         <textarea
                             placeholder="Ghi chú"
@@ -669,6 +866,10 @@ export default function AdminClassManagement() {
                                 <div className="admin-class-management__info-grid">
                                     <InfoCard label="Sĩ số" value={`${selectedClassDetail.soHocVienDangKy}/${selectedClassDetail.siSoToiDa}`} />
                                     <InfoCard label="Số tiết/buổi" value={String(selectedClassDetail.soTietMotBuoi)} />
+                                    <InfoCard label="Thứ học" value={selectedClassDetail.thuTrongTuan || 'Chưa xếp'} />
+                                    <InfoCard label="Ca học" value={selectedClassDetail.caHoc || 'Chưa xếp'} />
+                                    <InfoCard label="Phòng học" value={selectedClassDetail.phongHoc || 'Chưa xếp'} />
+                                    <InfoCard label="Hình thức" value={selectedClassDetail.hinhThucHoc || 'Chưa rõ'} />
                                     <InfoCard label="Cho phép đăng ký" value={selectedClassDetail.allowDangKy ? 'Có' : 'Không'} />
                                     <InfoCard label="Còn lại" value={String(selectedClassDetail.soChoConLai)} />
                                 </div>
@@ -681,7 +882,28 @@ export default function AdminClassManagement() {
                                 </div>
 
                                 <div>
-                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Danh sách học viên</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                        <div style={{ fontWeight: 700 }}>Danh sách học viên</div>
+                                        {selectedClassDetail.hocViensRegistered && selectedClassDetail.hocViensRegistered.length > 0 && (
+                                            <button 
+                                                onClick={() => void exportRosterToPDF()}
+                                                style={{ 
+                                                    padding: '4px 8px', 
+                                                    fontSize: '12px', 
+                                                    background: '#e11d48', 
+                                                    color: 'white', 
+                                                    border: 'none', 
+                                                    borderRadius: '4px', 
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px'
+                                                }}
+                                            >
+                                                📄 Xuất PDF
+                                            </button>
+                                        )}
+                                    </div>
                                     {selectedClassDetail.hocViensRegistered && selectedClassDetail.hocViensRegistered.length > 0 ? (
                                         <div style={{ display: 'grid', gap: 10 }}>
                                             {selectedClassDetail.hocViensRegistered.map((student) => (

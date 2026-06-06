@@ -211,6 +211,20 @@ export default function CourseDetail() {
                                         <span className="label">Còn lại</span>
                                         <span className="value">{lophoc.soChoConLai}</span>
                                     </div>
+                                    <div className="info-row" style={{ marginTop: 10, borderTop: '1px solid #f1f5f9', paddingTop: 10 }}>
+                                        <span className="label">Lịch học</span>
+                                        <span className="value">
+                                            {lophoc.thuTrongTuan || 'Chưa xếp'}, {lophoc.caHoc || 'chưa rõ ca'}
+                                        </span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="label">Phòng học</span>
+                                        <span className="value">{lophoc.phongHoc || 'Chưa xếp'}</span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="label">Hình thức</span>
+                                        <span className="value">{lophoc.hinhThucHoc || 'Chưa rõ'}</span>
+                                    </div>
                                     {lophoc.ngayBatDau && (
                                         <div className="info-row">
                                             <span className="label">Bắt đầu</span>

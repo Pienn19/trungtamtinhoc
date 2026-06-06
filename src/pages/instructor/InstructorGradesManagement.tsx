@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ketQuaHocTapService } from '../../services/ketQuaHocTapService'
 import type { ClassStudentResultDTO, TeacherClassDTO } from '../../types/KetQuaHocTap'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 export default function InstructorGradesManagement() {
     const [classes, setClasses] = useState<TeacherClassDTO[]>([])
@@ -96,7 +98,7 @@ export default function InstructorGradesManagement() {
             console.error('Lỗi load học viên của lớp:', err)
             setStudents([])
             setSelectedRegistrationId(0)
-            setError('Không thể tải danh sách học viên của lớp')
+            setError('Danh sách học viên của lớp')
         } finally {
             setLoadingStudents(false)
         }
@@ -154,6 +156,94 @@ export default function InstructorGradesManagement() {
             alert(err?.response?.data?.message || 'Lỗi khi xuất file')
         }
     }
+
+    const exportRosterToPDF = async () => {
+        if (!students || students.length === 0) {
+            alert('Lớp này chưa có học viên nào để xuất.');
+            return;
+        }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.top = '0';
+        tempDiv.style.width = '800px';
+        tempDiv.style.background = '#ffffff';
+        tempDiv.style.padding = '40px';
+        tempDiv.style.fontFamily = 'Arial, sans-serif';
+        tempDiv.style.color = '#000000';
+
+        const targetStudents = filteredStudents.length > 0 ? filteredStudents : students;
+
+        let tableHTML = `
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #1e3a8a; margin: 0; font-size: 24px; text-transform: uppercase;">Kết Quả Học Tập</h1>
+                <h2 style="color: #475569; margin: 10px 0 0 0; font-size: 18px; font-weight: normal;">Lớp: <strong>${selectedClass?.tenLop || `Lớp ${selectedClassId}`}</strong></h2>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9; color: #1e293b;">
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center; width: 40px;">STT</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left;">Họ Tên</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left;">Email</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center;">Điểm LT</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center;">Điểm thực hành</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center;">Điểm TB</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: center;">Kết Luận</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        targetStudents.forEach((student, index) => {
+            tableHTML += `
+                <tr>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center;">${index + 1}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px;"><strong>${student.hoTenHocVien || ''}</strong></td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px;">${student.emailHocVien || ''}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center;">${student.diemLyThuyet !== undefined && student.diemLyThuyet !== null ? student.diemLyThuyet.toFixed(1) : '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center;">${student.diemThucHanh !== undefined && student.diemThucHanh !== null ? student.diemThucHanh.toFixed(1) : '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center; font-weight: bold; color: #0f172a;">${student.diemTrungBinh !== undefined && student.diemTrungBinh !== null ? student.diemTrungBinh.toFixed(2) : '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: center; font-weight: bold; color: ${student.ketLuan === 'Đạt' ? '#16a34a' : (student.ketLuan === 'Không Đạt' ? '#dc2626' : '#64748b')}">${student.ketLuan || '-'}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+            </table>
+            <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 14px;">
+                <div>
+                    <p style="margin: 0;"><strong>Tổng số học viên:</strong> ${targetStudents.length}</p>
+                </div>
+                <div style="text-align: center; margin-right: 40px;">
+                    <p style="margin: 0 0 60px 0;">Ngày ..... tháng ..... năm .......</p>
+                    <p style="margin: 0; font-weight: bold;">Giảng viên phụ trách</p>
+                </div>
+            </div>
+        `;
+
+        tempDiv.innerHTML = tableHTML;
+        document.body.appendChild(tempDiv);
+
+        try {
+            const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            const className = selectedClass?.tenLop?.replace(/\s+/g, '_') || selectedClassId;
+            pdf.save(`KetQuaHocTap_${className}.pdf`);
+        } catch (err) {
+            console.error('Lỗi xuất PDF:', err);
+            alert('Không thể xuất PDF. Vui lòng thử lại sau.');
+        } finally {
+            document.body.removeChild(tempDiv);
+        }
+    };
 
     const handleSave = async () => {
         if (!selectedRegistrationId) {
@@ -320,7 +410,7 @@ export default function InstructorGradesManagement() {
                         value={diemLyThuyet}
                         onChange={(e) => setDiemLyThuyet(e.target.value)}
                         style={{ width: '100%', padding: 10, marginTop: 6 }}
-                        placeholder="Nhập điểm lý thuyết"
+                        placeholder="Nhập Điểm lý thuyết"
                     />
                 </div>
                 <div>
@@ -333,7 +423,7 @@ export default function InstructorGradesManagement() {
                         value={diemThucHanh}
                         onChange={(e) => setDiemThucHanh(e.target.value)}
                         style={{ width: '100%', padding: 10, marginTop: 6 }}
-                        placeholder="Nhập điểm thực hành"
+                        placeholder="Nhập Điểm thực hành"
                     />
                 </div>
             </div>
@@ -345,14 +435,35 @@ export default function InstructorGradesManagement() {
             </div>
 
             <div style={{ background: 'white', padding: 16, borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <h3 style={{ marginTop: 0 }}>Danh sách học viên của lớp</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h3 style={{ margin: 0 }}>Danh sách học viên của lớp</h3>
+                    {students && students.length > 0 && (
+                        <button 
+                            onClick={() => void exportRosterToPDF()}
+                            style={{ 
+                                padding: '6px 12px', 
+                                fontSize: '14px', 
+                                background: '#e11d48', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: '4px', 
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            📄 Xuất PDF
+                        </button>
+                    )}
+                </div>
                 <div style={{ overflowX: 'auto' }}>
                     <table border={1} cellPadding={10} style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
                                 <th>Học viên</th>
                                 <th>Email</th>
-                                <th>Điểm lý thuyết</th>
+                                <th>Điểm LT</th>
                                 <th>Điểm thực hành</th>
                                 <th>Điểm TB</th>
                                 <th>Kết luận</th>

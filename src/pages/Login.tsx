@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
-import { login } from "../services/authService";
+import { login, forgotPassword } from "../services/authService";
 import { type LoginDTO } from "../types/Auth";
 import { normalizeUserRole } from "../utils/authHelper";
 
@@ -75,6 +75,19 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    const username = window.prompt("Vui lòng nhập Tên đăng nhập hoặc Email của bạn:");
+    if (!username || !username.trim()) return;
+
+    try {
+      const res = await forgotPassword(username.trim());
+      toast.success(res.message || "Đặt lại mật khẩu thành công");
+      alert(res.message || "Mật khẩu của bạn đã được đặt lại.");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Không thể yêu cầu đặt lại mật khẩu!");
+    }
+  };
+
   return (
     <div className="page-shell" style={{ minHeight: 'calc(100vh - 120px)', display: 'grid', alignItems: 'center' }}>
       <div className="surface-card" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(320px, 0.9fr)', overflow: 'hidden' }}>
@@ -104,6 +117,15 @@ const Login = () => {
           <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 14 }}>
             <input className="auth-input" type="text" name="tenDangNhap" placeholder="Tên đăng nhập" value={form.tenDangNhap} onChange={handleChange} required disabled={isLoading} />
             <input className="auth-input" type="password" name="matKhau" placeholder="Mật khẩu" value={form.matKhau} onChange={handleChange} required disabled={isLoading} />
+
+            <div style={{ textAlign: 'right', marginTop: '-4px', marginBottom: '8px' }}>
+              <span 
+                onClick={handleForgotPassword} 
+                style={{ color: '#0b78b3', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 600 }}
+              >
+                Quên mật khẩu?
+              </span>
+            </div>
 
             <button type="submit" disabled={isLoading} className="auth-button">
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}

@@ -51,8 +51,11 @@ export interface LopHocDTO {
     ngayHocTrongTuan?: string
     gioBatDau?: string
     gioKetThuc?: string
-    isConflict?: boolean
-    conflictMessage?: string
+    soTietMotBuoi?: number
+    thuTrongTuan?: string
+    caHoc?: string
+    phongHoc?: string
+    hinhThucHoc?: string
 }
 
 export interface DangKyDTO {
@@ -109,23 +112,6 @@ export interface BienLaiDTO {
     ngayLap: string
     trangThai: string
     ghiChu?: string
-    hocVienInfo?: {
-        idHocVien: number
-        hoTen: string
-        email: string
-        dienThoai: string
-    }
-    khoaHocInfo?: {
-        idKhoaHoc: number
-        tenKhoaHoc: string
-        hocPhi: number
-    }
-    lopHocInfo?: {
-        idLop: number
-        tenLop: string
-        ngayBatDau: string
-        ngayKetThuc: string
-    }
 }
 
 export interface ConfirmPaymentRequestDTO {

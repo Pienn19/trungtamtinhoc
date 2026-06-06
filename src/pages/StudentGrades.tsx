@@ -3,12 +3,15 @@ import { getMyLearningResults } from '../services/examService'
 
 interface LearningResult {
     idDangKy: number
-    courseeName: string
-    className: string
+    tenKhoaHoc: string
+    tenLop: string
+    ngayBatDau: string | null
+    ngayKetThuc: string | null
     diemLyThuyet: number | null
     diemThucHanh: number | null
     diemTrungBinh: number | null
     ketLuan: string | null
+    trangThaiDangKy: string
 }
 
 export default function StudentGrades() {
@@ -71,9 +74,11 @@ export default function StudentGrades() {
                                     }}>
                                         <th style={{ padding: '12px' }}>Khóa Học</th>
                                         <th>Lớp Học</th>
-                                        <th style={{ textAlign: 'center' }}>Điểm Lý Thuyết</th>
-                                        <th style={{ textAlign: 'center' }}>Điểm Thực Hành</th>
-                                        <th style={{ textAlign: 'center' }}>Điểm Tổng Kết</th>
+                                        <th>Ngày Bắt Đầu</th>
+                                        <th>Ngày Kết Thúc</th>
+                                        <th style={{ textAlign: 'center' }}>Điểm lý thuyết</th>
+                                        <th style={{ textAlign: 'center' }}>Điểm thực hành</th>
+                                        <th style={{ textAlign: 'center' }}>Điểm Trung Bình</th>
                                         <th>Kết Luận</th>
                                     </tr>
                                 </thead>
@@ -83,8 +88,10 @@ export default function StudentGrades() {
                                             borderBottom: '1px solid #e5e7eb',
                                             background: idx % 2 === 0 ? '#fafbfc' : 'white'
                                         }}>
-                                            <td style={{ padding: '12px', fontWeight: 500 }}>{result.courseeName}</td>
-                                            <td>{result.className}</td>
+                                            <td style={{ padding: '12px', fontWeight: 500 }}>{result.tenKhoaHoc}</td>
+                                            <td>{result.tenLop}</td>
+                                            <td>{formatDate(result.ngayBatDau)}</td>
+                                            <td>{formatDate(result.ngayKetThuc)}</td>
                                             <td style={{ textAlign: 'center', fontWeight: 600 }}>
                                                 {result.diemLyThuyet !== null ? result.diemLyThuyet.toFixed(1) : '-'}
                                             </td>
