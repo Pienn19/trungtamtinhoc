@@ -52,6 +52,7 @@ export type ClassStudentResultDTO = {
     diemThucHanh?: number | null;
     diemTrungBinh?: number | null;
     ketLuan?: string | null;
+    trangThaiChungChi?: string | null;
 };
 
 export type CertificateCandidateDTO = {
@@ -69,4 +70,5 @@ export type CertificateCandidateDTO = {
     daCoChungChi: boolean;
     idChungChi?: number | null;
     ngayCap?: string | null;
+    trangThaiChungChi?: string | null;
 };

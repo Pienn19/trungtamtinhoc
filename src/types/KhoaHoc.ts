@@ -114,6 +114,27 @@ export interface BienLaiDTO {
     ngayLap: string
     trangThai: string
     ghiChu?: string
+    hocVienInfo?: {
+        idHocVien: number
+        hoTen: string
+        email: string
+        dienThoai?: string
+    }
+    khoaHocInfo?: {
+        idKhoaHoc: number
+        tenKhoaHoc: string
+        hocPhi: number
+    }
+    lopHocInfo?: {
+        idLop: number
+        tenLop: string
+        ngayBatDau?: string
+        ngayKetThuc?: string
+        tenGiangVien?: string | null
+        ngayHocTrongTuan?: string
+        gioBatDau?: string
+        gioKetThuc?: string
+    }
 }
 
 export interface ConfirmPaymentRequestDTO {

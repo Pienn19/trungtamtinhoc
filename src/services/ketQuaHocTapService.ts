@@ -69,6 +69,14 @@ export const ketQuaHocTapService = {
         return await axiosClient.post(`/chungchi/approve/${idKetQua}`);
     },
 
+    rejectCertificate: async (idKetQua: number) => {
+        return await axiosClient.post(`/chungchi/reject/${idKetQua}`);
+    },
+
+    proposeCertificate: async (idKetQua: number) => {
+        return await axiosClient.post(`/chungchi/propose/${idKetQua}`);
+    },
+
     revokeCertificate: async (idChungChi: number) => {
         return await axiosClient.delete(`/chungchi/${idChungChi}`);
     },
