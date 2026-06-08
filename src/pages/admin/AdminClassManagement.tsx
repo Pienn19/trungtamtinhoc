@@ -25,6 +25,7 @@ type LopHoc = {
     idKhoaHoc: number | null
     ngayBatDau: string | null
     ngayKetThuc: string | null
+    hanChotHuyDangKy?: string | null
     siSoToiDa: number
     soTietMotBuoi: number
     soHocVienDangKy: number
@@ -60,6 +61,7 @@ const defaultForm = {
     allowDangKy: true,
     ngayBatDau: '',
     ngayKetThuc: '',
+    hanChotHuyDangKy: '',
     trangThai: 'Planning',
     ghiChu: '',
     thuTrongTuan: '',
@@ -303,7 +305,8 @@ export default function AdminClassManagement() {
             (lop) =>
                 lop.idLop !== mergeSourceClass.idLop &&
                 lop.idKhoaHoc === mergeSourceClass.idKhoaHoc &&
-                lop.trangThai !== 'Closed',
+                lop.trangThai === 'Planning' &&
+                lop.soChoConLai >= (mergeSourceClass.soHocVienDangKy ?? 0),
         )
     }, [classes, mergeSourceClass])
 
@@ -317,7 +320,7 @@ export default function AdminClassManagement() {
 
     // Smart multi-merge target filter: only classes with enough capacity, not in source list, same course
     const multiMergeTargetOptions = useMemo(() => {
-        if (multiSourceIds.length === 0) return classes.filter((c) => c.trangThai !== 'Closed')
+        if (multiSourceIds.length === 0) return classes.filter((c) => c.trangThai === 'Planning')
 
         const totalSourceStudents = calculateTotalSourceStudents(multiSourceIds)
         const sourceCoursesSet = new Set<number>()
@@ -326,12 +329,12 @@ export default function AdminClassManagement() {
             if (cls?.idKhoaHoc) sourceCoursesSet.add(cls.idKhoaHoc)
         })
 
-        // Only show classes that: (1) not in source list, (2) not closed, (3) same course, (4) have enough capacity
+        // Only show classes that: (1) not in source list, (2) not started yet, (3) same course, (4) have enough capacity
         return classes
             .filter(
                 (lop) =>
                     !multiSourceIds.includes(lop.idLop) &&
-                    lop.trangThai !== 'Closed' &&
+                    lop.trangThai === 'Planning' &&
                     (sourceCoursesSet.size === 1 && lop.idKhoaHoc === Array.from(sourceCoursesSet)[0]) &&
                     lop.soChoConLai >= totalSourceStudents,
             )
@@ -401,6 +404,7 @@ export default function AdminClassManagement() {
             allowDangKy: lop.allowDangKy,
             ngayBatDau: lop.ngayBatDau ? lop.ngayBatDau.slice(0, 10) : '',
             ngayKetThuc: lop.ngayKetThuc ? lop.ngayKetThuc.slice(0, 10) : '',
+            hanChotHuyDangKy: lop.hanChotHuyDangKy ? lop.hanChotHuyDangKy.slice(0, 16) : '',
             trangThai: lop.trangThai ?? 'Planning',
             ghiChu: lop.ghiChu ?? '',
             thuTrongTuan: lop.thuTrongTuan ?? '',
@@ -449,6 +453,17 @@ export default function AdminClassManagement() {
             return
         }
 
+        if (formData.hanChotHuyDangKy) {
+            const hanChot = new Date(formData.hanChotHuyDangKy)
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            tomorrow.setHours(0, 0, 0, 0)
+            if (hanChot < tomorrow) {
+                alert('Hạn chót hủy đăng ký phải bắt đầu từ ngày mai trở đi')
+                return
+            }
+        }
+
         try {
             setSubmitting(true)
             const payload = {
@@ -459,6 +474,7 @@ export default function AdminClassManagement() {
                 allowDangKy: formData.allowDangKy,
                 ngayBatDau: formData.ngayBatDau ? `${formData.ngayBatDau}T00:00:00` : null,
                 ngayKetThuc: formData.ngayKetThuc ? `${formData.ngayKetThuc}T00:00:00` : null,
+                hanChotHuyDangKy: formData.hanChotHuyDangKy ? `${formData.hanChotHuyDangKy}:00` : null,
                 ghiChu: formData.ghiChu || null,
                 thuTrongTuan: formData.thuTrongTuan || null,
                 caHoc: formData.caHoc || null,
@@ -763,6 +779,26 @@ export default function AdminClassManagement() {
                                     disabled
                                     className="admin-class-management__form-input"
                                     style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="admin-class-management__form-row" style={{ gridTemplateColumns: '1fr' }}>
+                            <div>
+                                <div className="admin-class-management__form-label">Hạn chót hủy đăng ký (Dành cho học viên, không bắt buộc)</div>
+                                <input
+                                    type="datetime-local"
+                                    min={(() => {
+                                        const d = new Date()
+                                        d.setDate(d.getDate() + 1)
+                                        d.setHours(0, 0, 0, 0)
+                                        const yyyy = d.getFullYear()
+                                        const mm = String(d.getMonth() + 1).padStart(2, '0')
+                                        const dd = String(d.getDate()).padStart(2, '0')
+                                        return `${yyyy}-${mm}-${dd}T00:00`
+                                    })()}
+                                    value={formData.hanChotHuyDangKy || ''}
+                                    onChange={(e) => setFormData({ ...formData, hanChotHuyDangKy: e.target.value })}
+                                    className="admin-class-management__form-input"
                                 />
                             </div>
                         </div>

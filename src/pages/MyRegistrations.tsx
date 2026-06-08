@@ -200,13 +200,23 @@ export default function MyRegistrations() {
                                             </button>
                                         )}
 
-                                        <button
-                                            className="btn-cancel"
-                                            onClick={() => handleCancel(reg.idDangKy)}
-                                            disabled={canceling === reg.idDangKy}
-                                        >
-                                            {canceling === reg.idDangKy ? 'Đang hủy...' : 'Hủy Đăng Ký'}
-                                        </button>
+                                        {(() => {
+                                            const now = new Date()
+                                            const hanChot = reg.lopHocInfo.hanChotHuyDangKy ? new Date(reg.lopHocInfo.hanChotHuyDangKy) : null
+                                            const isPastDeadline = hanChot ? now > hanChot : false
+
+                                            return (
+                                                <button
+                                                    className="btn-cancel"
+                                                    style={isPastDeadline ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                                                    onClick={() => handleCancel(reg.idDangKy)}
+                                                    disabled={canceling === reg.idDangKy || isPastDeadline}
+                                                    title={isPastDeadline ? 'Đã qua hạn chót hủy đăng ký lớp này' : ''}
+                                                >
+                                                    {canceling === reg.idDangKy ? 'Đang hủy...' : isPastDeadline ? 'Đã hết hạn hủy' : 'Hủy Đăng Ký'}
+                                                </button>
+                                            )
+                                        })()}
                                     </div>
                                 </div>
                             )

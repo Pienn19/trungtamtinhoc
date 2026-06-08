@@ -61,7 +61,11 @@ export const confirmPayment = async (
         throw new Error(error || 'Lỗi khi xác nhận thanh toán')
     }
 
-    return response.json()
+    // Sau khi xác nhận thành công, gọi lại API để lấy thông tin đầy đủ
+    const payment = await getPaymentInfo(registrationId)
+    const receipt = await getReceiptByRegistrationId(registrationId)
+
+    return { payment, receipt }
 }
 
 // Get receipt details

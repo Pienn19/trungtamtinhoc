@@ -20,6 +20,8 @@ interface ChuyenLop {
 interface LopHoc {
     idLop: number;
     tenLop: string;
+    soChoConLai?: number;
+    trangThai?: string;
 }
 
 interface HocVien {
@@ -339,10 +341,17 @@ const AdminClassTransfer = () => {
                                     style={styles.control}
                                 >
                                     <option value="">-- Chọn lớp mới --</option>
-                                    {classes.map((c) => (
-                                        <option key={c.idLop} value={c.idLop}>
-                                            {c.tenLop}
-                                        </option>
+                                    {classes
+                                        .filter((c) => {
+                                            if (c.idLop.toString() === formData.idLopCu) return false;
+                                            if (c.trangThai && c.trangThai !== 'Planning') return false;
+                                            if (c.soChoConLai !== undefined && c.soChoConLai <= 0) return false;
+                                            return true;
+                                        })
+                                        .map((c) => (
+                                            <option key={c.idLop} value={c.idLop}>
+                                                {c.tenLop}
+                                            </option>
                                     ))}
                                 </select>
                             </div>
