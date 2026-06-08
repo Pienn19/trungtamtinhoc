@@ -41,9 +41,10 @@ export interface LopHocDTO {
     idLop: number
     tenLop: string
     idKhoaHoc: number
-    ngayBatDau: string
-    ngayKetThuc: string
-    siSoToiDa: number
+    ngayBatDau?: string;
+    ngayKetThuc?: string;
+    hanChotHuyDangKy?: string;
+    siSoToiDa: number;
     soHocVienDangKy: number
     soChoConLai: number
     allowDangKy: boolean
