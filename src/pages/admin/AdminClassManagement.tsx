@@ -105,6 +105,7 @@ export default function AdminClassManagement() {
     const [classes, setClasses] = useState<LopHoc[]>([])
     const [courses, setCourses] = useState<KhoaHocOption[]>([])
     const [rooms, setRooms] = useState<any[]>([])
+    const [availableRooms, setAvailableRooms] = useState<any[]>([])
     const [selectedClassId, setSelectedClassId] = useState<number | null>(null)
     const [selectedClassDetail, setSelectedClassDetail] = useState<LopHocDetail | null>(null)
     const [loading, setLoading] = useState(true)
@@ -137,6 +138,33 @@ export default function AdminClassManagement() {
             void loadClassDetail(selectedClassId)
         }
     }, [selectedClassId])
+
+    useEffect(() => {
+        const fetchAvailableRooms = async () => {
+            if (!formData.ngayBatDau || !formData.ngayKetThuc || !formData.thuTrongTuan || !formData.caHoc) {
+                setAvailableRooms(rooms)
+                return
+            }
+            try {
+                const res = await axiosClient.get('/phongthi/available', {
+                    params: {
+                        ngayBatDau: formData.ngayBatDau,
+                        ngayKetThuc: formData.ngayKetThuc,
+                        thuTrongTuan: formData.thuTrongTuan,
+                        caHoc: formData.caHoc,
+                        currentLopId: editingId
+                    }
+                })
+                setAvailableRooms(Array.isArray(res.data) ? res.data : [])
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách phòng trống', error)
+                setAvailableRooms(rooms)
+            }
+        }
+        if (showForm) {
+            fetchAvailableRooms()
+        }
+    }, [formData.ngayBatDau, formData.ngayKetThuc, formData.thuTrongTuan, formData.caHoc, editingId, rooms, showForm])
 
     // Keyboard accessibility: Close modals on Esc key
     useEffect(() => {
@@ -322,6 +350,7 @@ export default function AdminClassManagement() {
             setClasses(Array.isArray(classesRes.data) ? classesRes.data : [])
             setCourses(Array.isArray(coursesRes.data) ? coursesRes.data : [])
             setRooms(Array.isArray(roomsRes.data) ? roomsRes.data : [])
+            setAvailableRooms(Array.isArray(roomsRes.data) ? roomsRes.data : [])
 
             const firstClass = Array.isArray(classesRes.data) && classesRes.data.length > 0 ? classesRes.data[0] : null
             if (firstClass) {
@@ -677,7 +706,7 @@ export default function AdminClassManagement() {
                                     className="admin-class-management__form-select"
                                 >
                                     <option value="">-- Chọn phòng học --</option>
-                                    {rooms.map((r) => (
+                                    {availableRooms.map((r) => (
                                         <option key={r.idPhong} value={r.tenPhong}>{r.tenPhong} (Sức chứa: {r.soLuong})</option>
                                     ))}
                                 </select>
