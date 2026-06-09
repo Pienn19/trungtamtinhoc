@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { toast } from "react-toastify";
 
 const API_URL = "/api";
 
@@ -45,6 +49,9 @@ const AdminReporting = () => {
     >([]);
     const [activeTab, setActiveTab] = useState("overview");
     const [loading, setLoading] = useState(true);
+    const [isExporting, setIsExporting] = useState(false);
+    const [isPdfRendering, setIsPdfRendering] = useState(false);
+    const reportRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         loadAllData();
@@ -105,6 +112,51 @@ const AdminReporting = () => {
         return "#64748b";
     };
 
+    const handleExportPDF = () => {
+        setIsExporting(true);
+        setIsPdfRendering(true);
+        const toastId = toast.loading("Đang tạo file PDF, hệ thống đang tải biểu đồ vui lòng đợi tí...");
+        
+        setTimeout(async () => {
+            if (!reportRef.current) {
+                toast.error("Không tìm thấy dữ liệu để xuất");
+                setIsExporting(false);
+                setIsPdfRendering(false);
+                return;
+            }
+            try {
+                const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true, backgroundColor: "#f8fafc" });
+                const imgData = canvas.toDataURL("image/png");
+                const pdf = new jsPDF("p", "mm", "a4");
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                
+                let position = 0;
+                let heightLeft = pdfHeight;
+                
+                pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft > 0) {
+                    position = heightLeft - pdfHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save("BaoCaoTongHop.pdf");
+                toast.update(toastId, { render: "Xuất file PDF thành công!", type: "success", isLoading: false, autoClose: 3000 });
+            } catch (error) {
+                console.error("Export PDF error", error);
+                toast.update(toastId, { render: "Có lỗi xảy ra khi xuất PDF", type: "error", isLoading: false, autoClose: 3000 });
+            } finally {
+                setIsExporting(false);
+                setIsPdfRendering(false);
+            }
+        }, 1500); // Wait for charts to animate
+    };
+
     if (loading) {
         return (
             <div style={styles.container}>
@@ -116,7 +168,16 @@ const AdminReporting = () => {
 
     return (
         <div style={styles.container}>
-            <h1>📊 Báo Cáo & Thống Kê</h1>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h1>📊 Báo Cáo & Thống Kê</h1>
+                <button 
+                    style={styles.exportBtn} 
+                    onClick={handleExportPDF}
+                    disabled={isExporting}
+                >
+                    {isExporting ? "Đang xuất..." : "📥 Xuất PDF Báo Cáo"}
+                </button>
+            </div>
 
             <div style={styles.tabs}>
                 <button
@@ -165,9 +226,12 @@ const AdminReporting = () => {
                 </button>
             </div>
 
-            {/* Overview Tab */}
-            {activeTab === "overview" && overview && (
-                <div style={styles.content}>
+            <div ref={reportRef} style={isPdfRendering ? { background: '#f8fafc', padding: 20 } : {}}>
+                {isPdfRendering && <h1 style={{textAlign: 'center', marginBottom: 20, color: '#1e293b'}}>Báo Cáo Tổng Hợp Thống Kê</h1>}
+
+                {/* Overview Tab */}
+                {(activeTab === "overview" || isPdfRendering) && overview && (
+                    <div style={{...styles.content, marginBottom: isPdfRendering ? 30 : 0}}>
                     <div style={styles.statsGrid}>
                         <StatCard
                             label="Tổng Khóa Học"
@@ -228,8 +292,8 @@ const AdminReporting = () => {
             )}
 
             {/* Courses Tab */}
-            {activeTab === "courses" && (
-                <div style={styles.content}>
+            {(activeTab === "courses" || isPdfRendering) && (
+                <div style={{...styles.content, marginBottom: isPdfRendering ? 30 : 0}}>
                     <h2>Thống Kê Khóa Học</h2>
                     {courseStats.length === 0 ? (
                         <p>Không có dữ liệu</p>
@@ -261,12 +325,30 @@ const AdminReporting = () => {
                             </tbody>
                         </table>
                     )}
+
+                    {courseStats.length > 0 && (
+                        <div style={{ marginTop: 40 }}>
+                            <h3>Biểu đồ Doanh Thu Khóa Học</h3>
+                            <div style={{ height: 400, width: "100%", marginTop: 20 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={courseStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="courseName" />
+                                        <YAxis tickFormatter={(value) => new Intl.NumberFormat("vi-VN", { notation: "compact", compactDisplay: "short" }).format(value)} />
+                                        <Tooltip formatter={(value: number) => formatVND(value)} />
+                                        <Legend />
+                                        <Bar dataKey="totalRevenue" name="Doanh Thu (VND)" fill="#10b981" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* Revenue Tab */}
-            {activeTab === "revenue" && revenueStats && (
-                <div style={styles.content}>
+            {(activeTab === "revenue" || isPdfRendering) && revenueStats && (
+                <div style={{...styles.content, marginBottom: isPdfRendering ? 30 : 0}}>
                     <div style={styles.sectionHeader}>
                         <div>
                             <h2 style={styles.sectionTitle}>Thống Kê Doanh Thu</h2>
@@ -358,13 +440,49 @@ const AdminReporting = () => {
                                 )}
                             </div>
                         </div>
+
+                        <div style={{ ...styles.revenueCharts, marginTop: 40 }}>
+                            <div style={{ ...styles.revenueChart, height: 350 }}>
+                                <h3>Biểu Đồ Doanh Thu Theo Trạng Thái</h3>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={revenueStats.byStatus}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="status" />
+                                        <YAxis tickFormatter={(value) => new Intl.NumberFormat("vi-VN", { notation: "compact", compactDisplay: "short" }).format(value)} />
+                                        <Tooltip formatter={(value: number) => formatVND(value)} />
+                                        <Bar dataKey="totalAmount" name="Tổng Tiền" fill="#6366f1">
+                                            {revenueStats.byStatus.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                            
+                            <div style={{ ...styles.revenueChart, height: 350 }}>
+                                <h3>Biểu Đồ Theo Phương Thức Thanh Toán</h3>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie data={revenueStats.byMethod} dataKey="totalAmount" nameKey="method" cx="50%" cy="50%" outerRadius={100} label={(entry) => entry.method}>
+                                            {revenueStats.byMethod.map((entry, index) => {
+                                                const colors = ["#0ea5e9", "#f43f5e", "#10b981", "#8b5cf6"];
+                                                return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                                            })}
+                                        </Pie>
+                                        <Tooltip formatter={(value: number) => formatVND(value)} />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             )}
 
             {/* Grades Tab */}
-            {activeTab === "grades" && (
-                <div style={styles.content}>
+            {(activeTab === "grades" || isPdfRendering) && (
+                <div style={{...styles.content, marginBottom: isPdfRendering ? 30 : 0}}>
                     <h2>Phân Bố Điểm Số</h2>
                     {gradeDistribution.length === 0 ? (
                         <p>Không có dữ liệu</p>
@@ -403,6 +521,7 @@ const AdminReporting = () => {
                     )}
                 </div>
             )}
+            </div>
         </div>
     );
 };
@@ -430,6 +549,19 @@ const StatCard = ({ label, value, icon, color }: StatCardProps) => (
 );
 
 const styles = {
+    exportBtn: {
+        backgroundColor: "#10b981",
+        color: "white",
+        border: "none",
+        padding: "8px 16px",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontWeight: "bold" as const,
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    },
     container: {
         padding: "20px",
     },
